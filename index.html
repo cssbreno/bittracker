@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planilha Gamer Pixelada</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.js"></script>
+
+    <!-- CSS customizado -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="p-4 sm:p-8">
+    <div class="container mx-auto max-w-full pixel-border bg-[#2c2c2c] p-4">
+      <header class="text-center mb-6">
+        <h1 class="header-title">Planilha de Games</h1>
+      </header>
+
+      <!-- Abas de Navegação -->
+      <div class="flex justify-center space-x-1 mb-6">
+        <button id="tabBtnQueroJogar" class="tab-btn active">
+          Quero Jogar
+        </button>
+        <button id="tabBtnZerados" class="tab-btn">Zerados</button>
+        <button id="tabBtnDesistidos" class="tab-btn">Desistidos</button>
+      </div>
+
+      <!-- Conteúdo das Abas -->
+      <main>
+        <!-- Aba 1: Quero Jogar -->
+        <div id="tabQueroJogar" class="tab-content">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-3">
+              <h2 class="section-title text-cyan-400">Lista de Desejos</h2>
+              <div class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
+                <table id="tableQueroJogar">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Categoria</th>
+                      <th>Lançamento</th>
+                      <th>Interesse</th>
+                      <th>Plataformas</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+                <div id="emptyQueroJogar" class="empty-state">
+                  Nenhum jogo na sua lista de desejos!
+                </div>
+              </div>
+              <div class="mt-4 flex space-x-2">
+                <button
+                  id="addQueroJogarBtn"
+                  class="pixel-btn pixel-btn-primary"
+                >
+                  <span class="mr-2">+</span>Adicionar Jogo
+                </button>
+                <button
+                  id="exportQueroJogarBtn"
+                  class="pixel-btn pixel-btn-secondary"
+                >
+                  <span class="mr-2">↓</span>Exportar CSV
+                </button>
+              </div>
+            </div>
+            <div class="lg:col-span-1">
+              <h2 class="section-title text-cyan-400">Hype-o-Meter</h2>
+              <div class="pixel-border-inset p-4 bg-[#1a1a1a]">
+                <canvas id="interesseChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aba 2: Jogos Zerados -->
+        <div id="tabZerados" class="tab-content hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-3">
+              <h2 class="section-title text-green-400">Hall da Fama</h2>
+              <div class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
+                <table id="tableZerados">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Nota</th>
+                      <th>Plataforma</th>
+                      <th>Tempo (h)</th>
+                      <th>Avaliação</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+                <div id="emptyZerados" class="empty-state">
+                  Você ainda não zerou nenhum jogo!
+                </div>
+              </div>
+              <div class="mt-4 flex space-x-2">
+                <button id="addZeradoBtn" class="pixel-btn pixel-btn-success">
+                  <span class="mr-2">🏆</span>Adicionar Jogo Zerado
+                </button>
+                <button
+                  id="exportZeradosBtn"
+                  class="pixel-btn pixel-btn-secondary"
+                >
+                  <span class="mr-2">↓</span>Exportar CSV
+                </button>
+              </div>
+            </div>
+            <div class="lg:col-span-1">
+              <h2 class="section-title text-green-400">Estatísticas</h2>
+              <div class="pixel-border-inset p-4 bg-[#1a1a1a] space-y-4">
+                <canvas id="notaChart"></canvas>
+                <div id="statsZerados" class="text-xl mt-4">
+                  <p>
+                    Total Zerado:
+                    <span class="text-yellow-400" id="totalZerados">0</span>
+                  </p>
+                  <p>
+                    Tempo Médio:
+                    <span class="text-yellow-400" id="tempoMedio">0h</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aba 3: Jogos Desistidos -->
+        <div id="tabDesistidos" class="tab-content hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-3">
+              <h2 class="section-title text-red-400">Cemitério de Jogos</h2>
+              <div class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
+                <table id="tableDesistidos">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Motivo</th>
+                      <th>Tempo (h)</th>
+                      <th>Observações</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+                <div id="emptyDesistidos" class="empty-state">
+                  Nenhum jogo abandonado. Continue assim!
+                </div>
+              </div>
+              <div class="mt-4 flex space-x-2">
+                <button id="addDesistidoBtn" class="pixel-btn pixel-btn-danger">
+                  <span class="mr-2">👻</span>Adicionar Jogo
+                </button>
+                <button
+                  id="exportDesistidosBtn"
+                  class="pixel-btn pixel-btn-secondary"
+                >
+                  <span class="mr-2">↓</span>Exportar CSV
+                </button>
+              </div>
+            </div>
+            <div class="lg:col-span-1">
+              <h2 class="section-title text-red-400">Análise de Desistência</h2>
+              <div class="pixel-border-inset p-4 bg-[#1a1a1a]">
+                <canvas id="motivoChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modals de Formulário -->
+    <div id="modalQueroJogar" class="modal">
+      <div class="modal-content pixel-border">
+        <h3 class="modal-title text-cyan-400">Novo Jogo na Lista</h3>
+        <form id="formQueroJogar" class="space-y-4">
+          <input type="hidden" id="queroJogarId" />
+          <div>
+            <label for="qjNome">Nome do Jogo</label>
+            <input type="text" id="qjNome" required />
+          </div>
+          <div>
+            <label for="qjCategoria">Categoria</label>
+            <input type="text" id="qjCategoria" />
+          </div>
+          <div>
+            <label for="qjSubcategoria">Subcategoria</label>
+            <input type="text" id="qjSubcategoria" />
+          </div>
+          <div>
+            <label for="qjDataLancamento">Data de Lançamento</label>
+            <input type="text" id="qjDataLancamento" />
+          </div>
+          <div>
+            <label for="qjInteresse">Interesse</label>
+            <select id="qjInteresse">
+              <option value="Baixo">Baixo</option>
+              <option value="Médio" selected>Médio</option>
+              <option value="Alto">Alto</option>
+            </select>
+          </div>
+          <div>
+            <label for="qjPlataformas">Plataformas</label>
+            <input type="text" id="qjPlataformas" />
+          </div>
+          <div>
+            <label for="qjStatus">Status</label>
+            <select id="qjStatus">
+              <option value="Já Lançado">Já Lançado</option>
+              <option value="Em Breve">Em Breve</option>
+              <option value="Sem Data">Sem Data</option>
+            </select>
+          </div>
+          <div>
+            <label for="qjTempoEstimado">Tempo Estimado (h)</label>
+            <input type="number" id="qjTempoEstimado" />
+          </div>
+          <div>
+            <label for="qjObservacoes">Observações</label>
+            <textarea id="qjObservacoes" rows="3"></textarea>
+          </div>
+          <div class="flex justify-end space-x-2 pt-4">
+            <button
+              type="button"
+              class="pixel-btn"
+              onclick="closeModal('modalQueroJogar')"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="pixel-btn pixel-btn-primary">
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="modalZerados" class="modal">
+      <div class="modal-content pixel-border">
+        <h3 class="modal-title text-green-400">Adicionar ao Hall da Fama</h3>
+        <form id="formZerados" class="space-y-4">
+          <input type="hidden" id="zeradoId" />
+          <div>
+            <label for="zNome">Nome do Jogo</label>
+            <input type="text" id="zNome" required />
+          </div>
+          <div>
+            <label for="zCategoria">Categoria</label>
+            <input type="text" id="zCategoria" />
+          </div>
+          <div>
+            <p class="mb-2">Nota (0-5 estrelas)</p>
+            <div class="star-rating">
+              <input type="radio" id="5-stars" name="rating" value="5" />
+              <label for="5-stars">★</label>
+              <input type="radio" id="4-stars" name="rating" value="4" />
+              <label for="4-stars">★</label>
+              <input type="radio" id="3-stars" name="rating" value="3" />
+              <label for="3-stars">★</label>
+              <input type="radio" id="2-stars" name="rating" value="2" />
+              <label for="2-stars">★</label>
+              <input type="radio" id="1-star" name="rating" value="1" />
+              <label for="1-star">★</label>
+            </div>
+          </div>
+          <div>
+            <label for="zDataZerei">Data em que zerei</label>
+            <input type="text" id="zDataZerei" placeholder="DD/MM/AAAA" />
+          </div>
+          <div>
+            <label for="zPlataforma">Plataforma</label>
+            <input type="text" id="zPlataforma" />
+          </div>
+          <div>
+            <label for="zTempoGasto">Tempo Gasto (h)</label>
+            <input type="number" id="zTempoGasto" />
+          </div>
+          <div>
+            <label for="zAvaliacao">Avaliação</label>
+            <textarea id="zAvaliacao" rows="3"></textarea>
+          </div>
+          <div class="flex justify-end space-x-2 pt-4">
+            <button
+              type="button"
+              class="pixel-btn"
+              onclick="closeModal('modalZerados')"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="pixel-btn pixel-btn-success">
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="modalDesistidos" class="modal">
+      <div class="modal-content pixel-border">
+        <h3 class="modal-title text-red-400">Registrar Desistência</h3>
+        <form id="formDesistidos" class="space-y-4">
+          <input type="hidden" id="desistidoId" />
+          <div>
+            <label for="dNome">Nome do Jogo</label>
+            <input type="text" id="dNome" required />
+          </div>
+          <div>
+            <label for="dCategoria">Categoria</label>
+            <input type="text" id="dCategoria" />
+          </div>
+          <div>
+            <label for="dMotivo">Motivo</label>
+            <select id="dMotivo">
+              <option value="Chato">Chato / Entediante</option>
+              <option value="Difícil">Muito Difícil</option>
+              <option value="Bugs">Bugs / Problemas</option>
+              <option value="Sem Tempo">Falta de Tempo</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+          <div>
+            <label for="dTempoGameplay">Tempo de Gameplay (h)</label>
+            <input type="number" id="dTempoGameplay" />
+          </div>
+          <div>
+            <label for="dObservacoes">Observações</label>
+            <textarea id="dObservacoes" rows="3"></textarea>
+          </div>
+          <div class="flex justify-end space-x-2 pt-4">
+            <button
+              type="button"
+              class="pixel-btn"
+              onclick="closeModal('modalDesistidos')"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="pixel-btn pixel-btn-danger">
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal">
+      <div class="modal-content pixel-border text-center">
+        <p id="confirmMessage" class="text-xl mb-6"></p>
+        <div class="flex justify-center space-x-4">
+          <button id="confirmBtnYes" class="pixel-btn pixel-btn-danger">
+            Sim
+          </button>
+          <button id="confirmBtnNo" class="pixel-btn">Não</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de Notificações (Toast) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50"></div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+  </body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planilha Gamer Pixelada</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.js"></script>
+
+    <!-- CSS customizado -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="p-4 sm:p-8">
+    <div class="container mx-auto max-w-full pixel-border bg-[#2c2c2c] p-4">
+      <header class="text-center mb-6">
+        <h1 class="header-title">Planilha de Games</h1>
+      </header>
+
+      <!-- Abas de Navegação -->
+      <div class="flex justify-center space-x-1 mb-6">
+        <button id="tabBtnQueroJogar" class="tab-btn active">
+          Quero Jogar
+        </button>
+        <button id="tabBtnZerados" class="tab-btn">Zerados</button>
+        <button id="tabBtnDesistidos" class="tab-btn">Desistidos</button>
+      </div>
+
+      <!-- Conteúdo das Abas -->
+      <main>
+        <!-- Aba 1: Quero Jogar -->
+        <div id="tabQueroJogar" class="tab-content">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-3">
+              <h2 class="section-title text-cyan-400">Lista de Desejos</h2>
+              <div class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
+                <table id="tableQueroJogar">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Categoria</th>
+                      <th>Lançamento</th>
+                      <th>Interesse</th>
+                      <th>Plataformas</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+                <div id="emptyQueroJogar" class="empty-state">
+                  Nenhum jogo na sua lista de desejos!
+                </div>
+              </div>
+              <div class="mt-4 flex space-x-2">
+                <button
+                  id="addQueroJogarBtn"
+                  class="pixel-btn pixel-btn-primary"
+                >
+                  <span class="mr-2">+</span>Adicionar Jogo
+                </button>
+                <button
+                  id="exportQueroJogarBtn"
+                  class="pixel-btn pixel-btn-secondary"
+                >
+                  <span class="mr-2">↓</span>Exportar CSV
+                </button>
+              </div>
+            </div>
+            <div class="lg:col-span-1">
+              <h2 class="section-title text-cyan-400">Hype-o-Meter</h2>
+              <div class="pixel-border-inset p-4 bg-[#1a1a1a]">
+                <canvas id="interesseChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aba 2: Jogos Zerados -->
+        <div id="tabZerados" class="tab-content hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-3">
+              <h2 class="section-title text-green-400">Hall da Fama</h2>
+              <div class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
+                <table id="tableZerados">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Nota</th>
+                      <th>Plataforma</th>
+                      <th>Tempo (h)</th>
+                      <th>Avaliação</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+                <div id="emptyZerados" class="empty-state">
+                  Você ainda não zerou nenhum jogo!
+                </div>
+              </div>
+              <div class="mt-4 flex space-x-2">
+                <button id="addZeradoBtn" class="pixel-btn pixel-btn-success">
+                  <span class="mr-2">🏆</span>Adicionar Jogo Zerado
+                </button>
+                <button
+                  id="exportZeradosBtn"
+                  class="pixel-btn pixel-btn-secondary"
+                >
+                  <span class="mr-2">↓</span>Exportar CSV
+                </button>
+              </div>
+            </div>
+            <div class="lg:col-span-1">
+              <h2 class="section-title text-green-400">Estatísticas</h2>
+              <div class="pixel-border-inset p-4 bg-[#1a1a1a] space-y-4">
+                <canvas id="notaChart"></canvas>
+                <div id="statsZerados" class="text-xl mt-4">
+                  <p>
+                    Total Zerado:
+                    <span class="text-yellow-400" id="totalZerados">0</span>
+                  </p>
+                  <p>
+                    Tempo Médio:
+                    <span class="text-yellow-400" id="tempoMedio">0h</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aba 3: Jogos Desistidos -->
+        <div id="tabDesistidos" class="tab-content hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-3">
+              <h2 class="section-title text-red-400">Cemitério de Jogos</h2>
+              <div class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
+                <table id="tableDesistidos">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Motivo</th>
+                      <th>Tempo (h)</th>
+                      <th>Observações</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+                <div id="emptyDesistidos" class="empty-state">
+                  Nenhum jogo abandonado. Continue assim!
+                </div>
+              </div>
+              <div class="mt-4 flex space-x-2">
+                <button id="addDesistidoBtn" class="pixel-btn pixel-btn-danger">
+                  <span class="mr-2">👻</span>Adicionar Jogo
+                </button>
+                <button
+                  id="exportDesistidosBtn"
+                  class="pixel-btn pixel-btn-secondary"
+                >
+                  <span class="mr-2">↓</span>Exportar CSV
+                </button>
+              </div>
+            </div>
+            <div class="lg:col-span-1">
+              <h2 class="section-title text-red-400">Análise de Desistência</h2>
+              <div class="pixel-border-inset p-4 bg-[#1a1a1a]">
+                <canvas id="motivoChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modals de Formulário -->
+    <div id="modalQueroJogar" class="modal">
+      <div class="modal-content pixel-border">
+        <h3 class="modal-title text-cyan-400">Novo Jogo na Lista</h3>
+        <form id="formQueroJogar" class="space-y-4">
+          <input type="hidden" id="queroJogarId" />
+          <div>
+            <label for="qjNome">Nome do Jogo</label>
+            <input type="text" id="qjNome" required />
+          </div>
+          <div>
+            <label for="qjCategoria">Categoria</label>
+            <input type="text" id="qjCategoria" />
+          </div>
+          <div>
+            <label for="qjSubcategoria">Subcategoria</label>
+            <input type="text" id="qjSubcategoria" />
+          </div>
+          <div>
+            <label for="qjDataLancamento">Data de Lançamento</label>
+            <input type="text" id="qjDataLancamento" />
+          </div>
+          <div>
+            <label for="qjInteresse">Interesse</label>
+            <select id="qjInteresse">
+              <option value="Baixo">Baixo</option>
+              <option value="Médio" selected>Médio</option>
+              <option value="Alto">Alto</option>
+            </select>
+          </div>
+          <div>
+            <label for="qjPlataformas">Plataformas</label>
+            <input type="text" id="qjPlataformas" />
+          </div>
+          <div>
+            <label for="qjStatus">Status</label>
+            <select id="qjStatus">
+              <option value="Já Lançado">Já Lançado</option>
+              <option value="Em Breve">Em Breve</option>
+              <option value="Sem Data">Sem Data</option>
+            </select>
+          </div>
+          <div>
+            <label for="qjTempoEstimado">Tempo Estimado (h)</label>
+            <input type="number" id="qjTempoEstimado" />
+          </div>
+          <div>
+            <label for="qjObservacoes">Observações</label>
+            <textarea id="qjObservacoes" rows="3"></textarea>
+          </div>
+          <div class="flex justify-end space-x-2 pt-4">
+            <button
+              type="button"
+              class="pixel-btn"
+              onclick="closeModal('modalQueroJogar')"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="pixel-btn pixel-btn-primary">
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="modalZerados" class="modal">
+      <div class="modal-content pixel-border">
+        <h3 class="modal-title text-green-400">Adicionar ao Hall da Fama</h3>
+        <form id="formZerados" class="space-y-4">
+          <input type="hidden" id="zeradoId" />
+          <div>
+            <label for="zNome">Nome do Jogo</label>
+            <input type="text" id="zNome" required />
+          </div>
+          <div>
+            <label for="zCategoria">Categoria</label>
+            <input type="text" id="zCategoria" />
+          </div>
+          <div>
+            <p class="mb-2">Nota (0-5 estrelas)</p>
+            <div class="star-rating">
+              <input type="radio" id="5-stars" name="rating" value="5" />
+              <label for="5-stars">★</label>
+              <input type="radio" id="4-stars" name="rating" value="4" />
+              <label for="4-stars">★</label>
+              <input type="radio" id="3-stars" name="rating" value="3" />
+              <label for="3-stars">★</label>
+              <input type="radio" id="2-stars" name="rating" value="2" />
+              <label for="2-stars">★</label>
+              <input type="radio" id="1-star" name="rating" value="1" />
+              <label for="1-star">★</label>
+            </div>
+          </div>
+          <div>
+            <label for="zDataZerei">Data em que zerei</label>
+            <input type="text" id="zDataZerei" placeholder="DD/MM/AAAA" />
+          </div>
+          <div>
+            <label for="zPlataforma">Plataforma</label>
+            <input type="text" id="zPlataforma" />
+          </div>
+          <div>
+            <label for="zTempoGasto">Tempo Gasto (h)</label>
+            <input type="number" id="zTempoGasto" />
+          </div>
+          <div>
+            <label for="zAvaliacao">Avaliação</label>
+            <textarea id="zAvaliacao" rows="3"></textarea>
+          </div>
+          <div class="flex justify-end space-x-2 pt-4">
+            <button
+              type="button"
+              class="pixel-btn"
+              onclick="closeModal('modalZerados')"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="pixel-btn pixel-btn-success">
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="modalDesistidos" class="modal">
+      <div class="modal-content pixel-border">
+        <h3 class="modal-title text-red-400">Registrar Desistência</h3>
+        <form id="formDesistidos" class="space-y-4">
+          <input type="hidden" id="desistidoId" />
+          <div>
+            <label for="dNome">Nome do Jogo</label>
+            <input type="text" id="dNome" required />
+          </div>
+          <div>
+            <label for="dCategoria">Categoria</label>
+            <input type="text" id="dCategoria" />
+          </div>
+          <div>
+            <label for="dMotivo">Motivo</label>
+            <select id="dMotivo">
+              <option value="Chato">Chato / Entediante</option>
+              <option value="Difícil">Muito Difícil</option>
+              <option value="Bugs">Bugs / Problemas</option>
+              <option value="Sem Tempo">Falta de Tempo</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+          <div>
+            <label for="dTempoGameplay">Tempo de Gameplay (h)</label>
+            <input type="number" id="dTempoGameplay" />
+          </div>
+          <div>
+            <label for="dObservacoes">Observações</label>
+            <textarea id="dObservacoes" rows="3"></textarea>
+          </div>
+          <div class="flex justify-end space-x-2 pt-4">
+            <button
+              type="button"
+              class="pixel-btn"
+              onclick="closeModal('modalDesistidos')"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="pixel-btn pixel-btn-danger">
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal">
+      <div class="modal-content pixel-border text-center">
+        <p id="confirmMessage" class="text-xl mb-6"></p>
+        <div class="flex justify-center space-x-4">
+          <button id="confirmBtnYes" class="pixel-btn pixel-btn-danger">
+            Sim
+          </button>
+          <button id="confirmBtnNo" class="pixel-btn">Não</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de Notificações (Toast) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50"></div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+  </body>
+</html>

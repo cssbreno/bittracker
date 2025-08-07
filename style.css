@@ -1,0 +1,299 @@
+/* Fontes pixeladas */
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap");
+
+/* --- Configuração Base --- */
+body {
+  font-family: "VT323", monospace;
+  font-size: 18px;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 25px 25px;
+}
+
+.header-title,
+.section-title,
+.modal-title {
+  font-family: "Press Start 2P", cursive;
+}
+
+.header-title {
+  font-size: 2.25rem;
+}
+.section-title {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+.modal-title {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Bordas Pixeladas --- */
+.pixel-border {
+  border: 4px solid #e0e0e0;
+  box-shadow: inset -4px -4px 0px 0px #666, inset 4px 4px 0px 0px #fff;
+}
+.pixel-border-inset {
+  border: 4px solid #4f4f4f;
+  box-shadow: inset 4px 4px 0px 0px #333, inset -4px -4px 0px 0px #777;
+}
+
+/* --- Abas de Navegação --- */
+.tab-btn {
+  background-color: #3a3a3a;
+  color: #b0b0b0;
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid #555;
+}
+.tab-btn.active {
+  background-color: #eab308;
+  color: #1a1a1a;
+  transform: translateY(-3px);
+  border-color: #eab308;
+}
+
+/* --- Botões --- */
+.pixel-btn {
+  display: inline-flex;
+  align-items: center;
+  background-color: #4a4a4a;
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid #666;
+  box-shadow: inset -2px -2px 0px 0px #333, inset 2px 2px 0px 0px #777;
+  text-decoration: none;
+}
+.pixel-btn:hover {
+  background-color: #5a5a5a;
+  transform: translateY(-1px);
+}
+.pixel-btn:active {
+  transform: translateY(2px);
+  box-shadow: inset 2px 2px 0px 0px #333;
+}
+.pixel-btn-primary {
+  background-color: #0891b2;
+  border-color: #06b6d4;
+}
+.pixel-btn-primary:hover {
+  background-color: #06b6d4;
+}
+.pixel-btn-success {
+  background-color: #16a34a;
+  border-color: #22c55e;
+}
+.pixel-btn-success:hover {
+  background-color: #22c55e;
+}
+.pixel-btn-danger {
+  background-color: #be123c;
+  border-color: #dc2626;
+}
+.pixel-btn-danger:hover {
+  background-color: #dc2626;
+}
+.pixel-btn-secondary {
+  background-color: #6b7280;
+  border-color: #9ca3af;
+}
+.pixel-btn-secondary:hover {
+  background-color: #7f8792;
+}
+
+/* --- Tabelas --- */
+.table-container {
+  min-height: 150px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+th,
+td {
+  border: 2px solid #555;
+  padding: 10px;
+  text-align: left;
+  white-space: normal;
+  word-break: break-word;
+}
+th {
+  background-color: #333;
+  color: #eab308;
+}
+tbody tr:nth-child(even) {
+  background-color: #2a2a2a;
+}
+tbody tr:hover {
+  background-color: #404040;
+}
+.empty-state {
+  display: none;
+  padding: 40px;
+  text-align: center;
+  font-size: 1.25rem;
+  color: #777;
+}
+
+/* --- Modals --- */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(2px);
+}
+.modal-content {
+  background-color: #2c2c2c;
+  margin: 10% auto;
+  padding: 25px;
+  width: 90%;
+  max-width: 600px;
+}
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #aaa;
+}
+input,
+select,
+textarea {
+  background-color: #1a1a1a;
+  border: 2px solid #555;
+  color: #e0e0e0;
+  padding: 10px;
+  width: 100%;
+  font-size: 1.1rem;
+  font-family: "VT323", monospace;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #eab308;
+  border-color: #eab308;
+}
+
+/* --- Componentes Específicos --- */
+.star-rating {
+  display: flex;
+  direction: rtl;
+  justify-content: center;
+}
+.star-rating input[type="radio"] {
+  display: none;
+}
+.star-rating label {
+  font-size: 2.5rem;
+  color: #444;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: auto;
+}
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #eab308;
+}
+
+/* --- Notificações (Toast) --- */
+.toast {
+  padding: 15px 20px;
+  margin-top: 10px;
+  color: #fff;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  border: 2px solid #333;
+  font-family: "VT323", monospace;
+  font-size: 1.1rem;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+.toast-success {
+  background-color: #16a34a;
+  border-color: #22c55e;
+}
+.toast-error {
+  background-color: #be123c;
+  border-color: #dc2626;
+}
+
+/* --- Responsividade --- */
+@media (max-width: 768px) {
+  .header-title {
+    font-size: 1.5rem;
+  }
+  .section-title {
+    font-size: 1.25rem;
+  }
+  .modal-title {
+    font-size: 1.1rem;
+  }
+
+  .pixel-btn {
+    padding: 8px 16px;
+    font-size: 1rem;
+  }
+
+  .tab-btn {
+    padding: 10px 16px;
+    font-size: 1rem;
+  }
+
+  th,
+  td {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+}
+
+/* --- Utilitários --- */
+.hidden {
+  display: none !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* --- Ajustes para ícones de ações --- */
+.action-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  padding: 4px;
+  margin: 0 2px;
+  transition: color 0.2s;
+}
+
+.action-btn:hover {
+  color: #fff;
+}
+
+.action-btn.edit:hover {
+  color: #06b6d4;
+}
+
+.action-btn.delete:hover {
+  color: #dc2626;
+}
