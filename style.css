@@ -23,6 +23,7 @@ body {
 
 .header-title {
   font-size: 2.25rem;
+  color: #e0e0e0;
 }
 .section-title {
   font-size: 1.75rem;
@@ -52,6 +53,11 @@ body {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   border: 2px solid #555;
+  font-family: "VT323", monospace;
+}
+.tab-btn:hover {
+  background-color: #4a4a4a;
+  color: #e0e0e0;
 }
 .tab-btn.active {
   background-color: #eab308;
@@ -74,6 +80,7 @@ body {
   border: 2px solid #666;
   box-shadow: inset -2px -2px 0px 0px #333, inset 2px 2px 0px 0px #777;
   text-decoration: none;
+  font-family: "VT323", monospace;
 }
 .pixel-btn:hover {
   background-color: #5a5a5a;
@@ -115,11 +122,13 @@ body {
 /* --- Tabelas --- */
 .table-container {
   min-height: 150px;
+  overflow-x: auto;
 }
 table {
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
+  background-color: #1a1a1a;
 }
 th,
 td {
@@ -128,16 +137,20 @@ td {
   text-align: left;
   white-space: normal;
   word-break: break-word;
+  vertical-align: middle;
 }
 th {
   background-color: #333;
   color: #eab308;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 tbody tr:nth-child(even) {
   background-color: #2a2a2a;
 }
 tbody tr:hover {
   background-color: #404040;
+  transition: background-color 0.2s ease;
 }
 .empty-state {
   display: none;
@@ -145,6 +158,7 @@ tbody tr:hover {
   text-align: center;
   font-size: 1.25rem;
   color: #777;
+  font-style: italic;
 }
 
 /* --- Modals --- */
@@ -162,15 +176,18 @@ tbody tr:hover {
 }
 .modal-content {
   background-color: #2c2c2c;
-  margin: 10% auto;
+  margin: 5% auto;
   padding: 25px;
   width: 90%;
   max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
 }
 label {
   display: block;
   margin-bottom: 0.5rem;
   color: #aaa;
+  font-weight: bold;
 }
 input,
 select,
@@ -182,12 +199,18 @@ textarea {
   width: 100%;
   font-size: 1.1rem;
   font-family: "VT323", monospace;
+  box-sizing: border-box;
 }
 input:focus,
 select:focus,
 textarea:focus {
   outline: 2px solid #eab308;
   border-color: #eab308;
+  background-color: #2a2a2a;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #777;
 }
 
 /* --- Componentes Específicos --- */
@@ -195,6 +218,7 @@ textarea:focus {
   display: flex;
   direction: rtl;
   justify-content: center;
+  margin: 10px 0;
 }
 .star-rating input[type="radio"] {
   display: none;
@@ -205,6 +229,7 @@ textarea:focus {
   cursor: pointer;
   transition: color 0.2s;
   width: auto;
+  margin: 0 2px;
 }
 .star-rating input[type="radio"]:checked ~ label,
 .star-rating label:hover,
@@ -223,6 +248,7 @@ textarea:focus {
   border: 2px solid #333;
   font-family: "VT323", monospace;
   font-size: 1.1rem;
+  max-width: 300px;
 }
 .toast.show {
   opacity: 1;
@@ -235,6 +261,10 @@ textarea:focus {
 .toast-error {
   background-color: #be123c;
   border-color: #dc2626;
+}
+.toast-info {
+  background-color: #0891b2;
+  border-color: #06b6d4;
 }
 
 /* --- Responsividade --- */
@@ -264,6 +294,46 @@ textarea:focus {
     padding: 8px;
     font-size: 0.9rem;
   }
+
+  .modal-content {
+    margin: 2% auto;
+    padding: 15px;
+    width: 95%;
+  }
+
+  .star-rating label {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 16px;
+  }
+
+  .header-title {
+    font-size: 1.2rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  .pixel-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 6px;
+    font-size: 0.8rem;
+  }
 }
 
 /* --- Utilitários --- */
@@ -281,19 +351,42 @@ textarea:focus {
   border: none;
   color: #aaa;
   cursor: pointer;
-  padding: 4px;
+  padding: 4px 6px;
   margin: 0 2px;
   transition: color 0.2s;
+  font-size: 1.2rem;
+  border-radius: 3px;
 }
 
 .action-btn:hover {
   color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .action-btn.edit:hover {
   color: #06b6d4;
+  background-color: rgba(6, 182, 212, 0.1);
 }
 
 .action-btn.delete:hover {
   color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.1);
+}
+
+/* --- Scrollbar personalizada --- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #777;
 }

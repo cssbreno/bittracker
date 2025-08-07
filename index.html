@@ -11,9 +11,6 @@
     <!-- Chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-    <!-- Lucide Icons -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.js"></script>
-
     <!-- CSS customizado -->
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -92,10 +89,10 @@
                   <thead>
                     <tr>
                       <th>Nome</th>
+                      <th>Categoria</th>
                       <th>Nota</th>
                       <th>Plataforma</th>
                       <th>Tempo (h)</th>
-                      <th>Avaliação</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
@@ -146,6 +143,7 @@
                   <thead>
                     <tr>
                       <th>Nome</th>
+                      <th>Categoria</th>
                       <th>Motivo</th>
                       <th>Tempo (h)</th>
                       <th>Observações</th>
@@ -235,7 +233,7 @@
             <button
               type="button"
               class="pixel-btn"
-              onclick="closeModal('modalQueroJogar')"
+              onclick="gameManager.closeModal('modalQueroJogar')"
             >
               Cancelar
             </button>
@@ -295,7 +293,7 @@
             <button
               type="button"
               class="pixel-btn"
-              onclick="closeModal('modalZerados')"
+              onclick="gameManager.closeModal('modalZerados')"
             >
               Cancelar
             </button>
@@ -342,7 +340,7 @@
             <button
               type="button"
               class="pixel-btn"
-              onclick="closeModal('modalDesistidos')"
+              onclick="gameManager.closeModal('modalDesistidos')"
             >
               Cancelar
             </button>
