@@ -244,114 +244,57 @@ function renderTable(stateKey, tableId, columns, themeColor) {
 
 // --- Gerenciamento de Modals ---
 function openModal(modalId, itemId = null) {
-  const modalHandlers = {
-    modalQueroJogar: () => handleQueroJogarModal(itemId),
-    modalZerados: () => handleZeradosModal(itemId),
-    modalDesistidos: () => handleDesistidosModal(itemId),
-  };
-
   const modal = document.getElementById(modalId);
   const form = modal.querySelector("form");
   form.reset();
+
+  // Define o ID do item (para edição)
   form.querySelector('input[type="hidden"]').value = itemId || "";
 
-  modalHandlers[modalId]?.();
+  if (modalId === "modalQueroJogar") {
+    const item = itemId ? state.queroJogar.find((g) => g.id === itemId) : {};
+    document.getElementById("qjNome").value = item.nome || "";
+    document.getElementById("qjCategoria").value = item.categoria || "";
+    document.getElementById("qjSubcategoria").value = item.subcategoria || "";
+    document.getElementById("qjDataLancamento").value =
+      item.dataLancamento || "";
+    document.getElementById("qjInteresse").value = item.interesse || "Médio";
+    document.getElementById("qjPlataformas").value = item.plataformas || "";
+    document.getElementById("qjStatus").value = item.status || "Já Lançado";
+    document.getElementById("qjTempoEstimado").value = item.tempoEstimado || "";
+    document.getElementById("qjObservacoes").value = item.observacoes || "";
+  } else if (modalId === "modalZerados") {
+    const item = itemId ? state.zerados.find((g) => g.id === itemId) : {};
+    document.getElementById("zNome").value = item.nome || "";
+    document.getElementById("zCategoria").value = item.categoria || "";
+
+    // Limpar seleção de estrelas
+    const checkedStar = form.querySelector('input[name="rating"]:checked');
+    if (checkedStar) checkedStar.checked = false;
+
+    // Definir nota se existir
+    if (item.nota) {
+      const starInput = form.querySelector(
+        `input[name="rating"][value="${item.nota}"]`
+      );
+      if (starInput) starInput.checked = true;
+    }
+
+    document.getElementById("zDataZerei").value = item.dataZerei || "";
+    document.getElementById("zPlataforma").value = item.plataforma || "";
+    document.getElementById("zTempoGasto").value = item.tempoGasto || "";
+    document.getElementById("zAvaliacao").value = item.avaliacao || "";
+  } else if (modalId === "modalDesistidos") {
+    const item = itemId ? state.desistidos.find((g) => g.id === itemId) : {};
+    document.getElementById("dNome").value = item.nome || "";
+    document.getElementById("dCategoria").value = item.categoria || "";
+    document.getElementById("dMotivo").value = item.motivo || "Chato";
+    document.getElementById("dTempoGameplay").value = item.tempoGameplay || "";
+    document.getElementById("dObservacoes").value = item.observacoes || "";
+  }
+
   modal.style.display = "block";
 }
-
-// Helper functions to handle different modal types
-function handleQueroJogarModal(itemId) {
-  const item = itemId ? state.queroJogar.find((g) => g.id === itemId) : {};
-  document.getElementById("qjNome").value = item.nome || "";
-  document.getElementById("qjCategoria").value = item.categoria || "";
-  document.getElementById("qjSubcategoria").value = item.subcategoria || "";
-  document.getElementById("qjDataLancamento").value = item.dataLancamento || "";
-  document.getElementById("qjInteresse").value = item.interesse || "Médio";
-  document.getElementById("qjPlataformas").value = item.plataformas || "";
-  document.getElementById("qjStatus").value = item.status || "Já Lançado";
-  document.getElementById("qjTempoEstimado").value = item.tempoEstimado || "";
-  document.getElementById("qjObservacoes").value = item.observacoes || "";
-}
-
-function handleZeradosModal(itemId) {
-  const item = itemId ? state.zerados.find((g) => g.id === itemId) : {};
-  document.getElementById("zNome").value = item.nome || "";
-  document.getElementById("zCategoria").value = item.categoria || "";
-
-  const form = document.getElementById("formZerados");
-  const checkedStar = form.querySelector('input[name="rating"]:checked');
-  if (checkedStar) checkedStar.checked = false;
-
-  if (item.nota) {
-    const starInput = form.querySelector(
-      `input[name="rating"][value="${item.nota}"]`
-    );
-    if (starInput) starInput.checked = true;
-  }
-
-  document.getElementById("zDataZerei").value = item.dataZerei || "";
-  document.getElementById("zPlataforma").value = item.plataforma || "";
-  document.getElementById("zTempoGasto").value = item.tempoGasto || "";
-  document.getElementById("zAvaliacao").value = item.avaliacao || "";
-}
-
-function handleDesistidosModal(itemId) {
-  const item = itemId ? state.desistidos.find((g) => g.id === itemId) : {};
-  document.getElementById("dNome").value = item.nome || "";
-  document.getElementById("dCategoria").value = item.categoria || "";
-  document.getElementById("dMotivo").value = item.motivo || "Chato";
-  document.getElementById("dTempoGameplay").value = item.tempoGameplay || "";
-  document.getElementById("dObservacoes").value = item.observacoes || "";
-}
-const modal = document.getElementById(modalId);
-const form = modal.querySelector("form");
-form.reset();
-
-// Define o ID do item (para edição)
-form.querySelector('input[type="hidden"]').value = itemId || "";
-
-if (modalId === "modalQueroJogar") {
-  const item = itemId ? state.queroJogar.find((g) => g.id === itemId) : {};
-  document.getElementById("qjNome").value = item.nome || "";
-  document.getElementById("qjCategoria").value = item.categoria || "";
-  document.getElementById("qjSubcategoria").value = item.subcategoria || "";
-  document.getElementById("qjDataLancamento").value = item.dataLancamento || "";
-  document.getElementById("qjInteresse").value = item.interesse || "Médio";
-  document.getElementById("qjPlataformas").value = item.plataformas || "";
-  document.getElementById("qjStatus").value = item.status || "Já Lançado";
-  document.getElementById("qjTempoEstimado").value = item.tempoEstimado || "";
-  document.getElementById("qjObservacoes").value = item.observacoes || "";
-} else if (modalId === "modalZerados") {
-  const item = itemId ? state.zerados.find((g) => g.id === itemId) : {};
-  document.getElementById("zNome").value = item.nome || "";
-  document.getElementById("zCategoria").value = item.categoria || "";
-
-  // Limpar seleção de estrelas
-  const checkedStar = form.querySelector('input[name="rating"]:checked');
-  if (checkedStar) checkedStar.checked = false;
-
-  // Definir nota se existir
-  if (item.nota) {
-    const starInput = form.querySelector(
-      `input[name="rating"][value="${item.nota}"]`
-    );
-    if (starInput) starInput.checked = true;
-  }
-
-  document.getElementById("zDataZerei").value = item.dataZerei || "";
-  document.getElementById("zPlataforma").value = item.plataforma || "";
-  document.getElementById("zTempoGasto").value = item.tempoGasto || "";
-  document.getElementById("zAvaliacao").value = item.avaliacao || "";
-} else if (modalId === "modalDesistidos") {
-  const item = itemId ? state.desistidos.find((g) => g.id === itemId) : {};
-  document.getElementById("dNome").value = item.nome || "";
-  document.getElementById("dCategoria").value = item.categoria || "";
-  document.getElementById("dMotivo").value = item.motivo || "Chato";
-  document.getElementById("dTempoGameplay").value = item.tempoGameplay || "";
-  document.getElementById("dObservacoes").value = item.observacoes || "";
-}
-
-modal.style.display = "block";
 
 function closeModal(modalId) {
   document.getElementById(modalId).style.display = "none";
