@@ -56,7 +56,7 @@
 
 ## 🖼 Prévia
 
-![Prévia do Projeto](cssbreno.github.io/spreadshett-gamer/)
+![Prévia do Projeto](https://cssbreno.github.io/spreadshett-gamer/)
 
 ---
 
