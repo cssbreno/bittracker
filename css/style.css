@@ -15,7 +15,8 @@ body {
   background-size: 25px 25px;
 }
 
-body.modal-open {
+/* --- AJUSTE --- Classe aplicada ao <html> para travar o scroll */
+html.modal-open {
   overflow: hidden;
 }
 

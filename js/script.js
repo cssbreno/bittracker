@@ -410,7 +410,6 @@ class GameManager {
         tr.innerHTML = cellsHTML;
         const actionsCell = document.createElement("td");
 
-        // --- AJUSTE --- Adicionada a classe 'action-btn' para estilização do hover
         const viewBtn = document.createElement("button");
         viewBtn.className = "action-btn view";
         viewBtn.innerHTML = "👁️";
@@ -543,7 +542,7 @@ class GameManager {
       }
     });
 
-    document.body.classList.add("modal-open");
+    document.documentElement.classList.add("modal-open");
     modal.style.display = "block";
   }
 
@@ -593,7 +592,7 @@ class GameManager {
       }
     }
 
-    document.body.classList.add("modal-open");
+    document.documentElement.classList.add("modal-open");
     modal.style.display = "block";
   }
 
@@ -601,7 +600,7 @@ class GameManager {
     const modal = document.getElementById(modalId);
     if (modal) {
       modal.style.display = "none";
-      document.body.classList.remove("modal-open");
+      document.documentElement.classList.remove("modal-open");
     }
   }
 
@@ -625,7 +624,7 @@ class GameManager {
     if (!modal || !messageEl) return;
     messageEl.textContent = message;
 
-    document.body.classList.add("modal-open");
+    document.documentElement.classList.add("modal-open");
     modal.style.display = "block";
 
     const yesBtn = document.getElementById("confirmBtnYes");
@@ -691,7 +690,6 @@ class GameManager {
   }
 
   // --- Exportação ---
-  // --- CORREÇÃO --- Lógica completa da função de exportação para CSV
   exportToCsv(data, filename, headers) {
     if (!data || data.length === 0) {
       this.showToast("Não há dados para exportar.", "error");
@@ -706,20 +704,18 @@ class GameManager {
         return "";
       }
       const strCell = String(cell);
-      // Se a célula contém vírgula, aspas ou quebra de linha, a envolvemos em aspas
       if (
         strCell.includes(",") ||
         strCell.includes('"') ||
         strCell.includes("\n")
       ) {
-        // Substitui aspas duplas por duas aspas duplas
         return `"${strCell.replace(/"/g, '""')}"`;
       }
       return strCell;
     };
 
     const csvRows = [
-      headerTitles.join(","), // Cabeçalho
+      headerTitles.join(","),
       ...data.map((row) =>
         headerKeys.map((key) => escapeCsvCell(row[key])).join(",")
       ),
@@ -979,7 +975,7 @@ class GameManager {
       }
     });
 
-    // --- CORREÇÃO --- Event Listeners para os botões de exportação
+    // Event Listeners para os botões de exportação
     document
       .getElementById("exportQueroJogarBtn")
       ?.addEventListener("click", () => {
