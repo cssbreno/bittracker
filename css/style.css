@@ -29,6 +29,7 @@ body {
 .section-title {
   font-size: 1.75rem;
   margin-bottom: 1rem;
+  word-break: break-word;
 }
 .modal-title {
   font-size: 1.5rem;
@@ -43,6 +44,14 @@ body {
 .pixel-border-inset {
   border: 4px solid #4f4f4f;
   box-shadow: inset 4px 4px 0px 0px #333, inset -4px -4px 0px 0px #777;
+  max-width: 100%;
+}
+
+/* --- Gráficos --- */
+.chart-container {
+  position: relative;
+  max-width: 400px; /* Limita o tamanho em telas grandes */
+  margin: 0 auto;
 }
 
 /* --- Animações das Abas --- */
@@ -220,7 +229,7 @@ body {
 table {
   border-collapse: collapse;
   width: 100%;
-  table-layout: fixed;
+  table-layout: auto;
   background-color: #1a1a1a;
 }
 th,
@@ -337,7 +346,11 @@ label {
   color: #aaa;
   font-weight: bold;
 }
-input,
+
+/* Inputs, Selects, Textareas comuns */
+input[type="text"],
+input[type="number"],
+input[type="date"],
 select,
 textarea {
   background-color: #1a1a1a;
@@ -350,18 +363,42 @@ textarea {
   box-sizing: border-box;
   transition: all 0.3s ease;
 }
+
 input:focus,
 select:focus,
 textarea:focus {
   outline: 2px solid #eab308;
   border-color: #eab308;
   background-color: #2a2a2a;
-  transform: scale(1.02);
   box-shadow: 0 0 10px rgba(234, 179, 8, 0.3);
 }
+
 input::placeholder,
 textarea::placeholder {
   color: #777;
+}
+
+/* --- Sistema de Estrelas (CORRIGIDO) --- */
+.star-rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.star-rating input[type="radio"] {
+  display: none;
+}
+.star-rating label {
+  color: #555;
+  cursor: pointer;
+  font-size: 2rem;
+  transition: color 0.2s ease-in-out;
+  margin: 0;
+}
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input[type="radio"]:checked ~ label {
+  color: #eab308;
 }
 
 /* --- Validação de Formulários --- */
@@ -392,9 +429,10 @@ textarea::placeholder {
 
 input.error,
 select.error,
-textarea.error {
-  border-color: #dc2626;
-  background-color: rgba(220, 38, 38, 0.1);
+textarea.error,
+.searchable-dropdown.error .searchable-dropdown-display {
+  border-color: #dc2626 !important;
+  background-color: rgba(220, 38, 38, 0.1) !important;
 }
 
 input.error:focus,
@@ -403,4 +441,167 @@ textarea.error:focus {
   outline: 2px solid #dc2626;
   border-color: #dc2626;
   box-shadow: 0 0 10px rgba(220, 38, 38, 0.3);
+}
+
+/* --- Notificações Toast (CORRIGIDO) --- */
+#toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.toast {
+  padding: 15px 20px;
+  background-color: #333;
+  color: #fff;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+.toast-success {
+  background-color: #16a34a;
+}
+.toast-error {
+  background-color: #be123c;
+}
+
+/* --- Componente Dropdown com Pesquisa (NOVO) --- */
+.searchable-dropdown {
+  position: relative;
+}
+.searchable-dropdown-display {
+  background-color: #1a1a1a;
+  border: 2px solid #555;
+  padding: 10px;
+  width: 100%;
+  cursor: pointer;
+  min-height: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.searchable-dropdown-display .placeholder {
+  color: #777;
+}
+.searchable-dropdown-display .item-tag {
+  background-color: #eab308;
+  color: #1a1a1a;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.searchable-dropdown-options {
+  display: none;
+  position: absolute;
+  background-color: #2c2c2c;
+  border: 2px solid #777;
+  width: 100%;
+  z-index: 110; /* Acima do conteúdo do modal */
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+.searchable-dropdown-search {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-bottom: 2px solid #555;
+  background-color: #333;
+  color: #e0e0e0;
+}
+.searchable-dropdown-options ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.searchable-dropdown-options li {
+  padding: 10px;
+  cursor: pointer;
+}
+.searchable-dropdown-options li:hover {
+  background-color: #4a4a4a;
+}
+.searchable-dropdown-options li.hidden {
+  display: none;
+}
+.searchable-dropdown-options input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+/* --- Autocomplete da API (NOVO) --- */
+.autocomplete-results {
+  position: absolute;
+  width: 100%;
+  background: #2c2c2c;
+  border: 2px solid #555;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 120;
+}
+.autocomplete-results div {
+  padding: 10px;
+  cursor: pointer;
+}
+.autocomplete-results div:hover {
+  background: #4a4a4a;
+}
+.autocomplete-results .loading {
+  text-align: center;
+  padding: 10px;
+  color: #eab308;
+}
+
+/* --- Responsividade (NOVO/AJUSTADO) --- */
+@media (max-width: 1024px) {
+  .grid-cols-1.lg\:grid-cols-4 {
+    grid-template-columns: 1fr; /* Coluna única em tablets */
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 8px;
+  }
+  .header-title {
+    font-size: 1.5rem;
+  }
+  .section-title {
+    font-size: 1.25rem;
+  }
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 1rem;
+  }
+  th,
+  td {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+  .modal-content {
+    margin: 10% auto;
+    padding: 15px;
+    max-height: 90vh;
+  }
+  #toast-container {
+    right: 10px;
+    bottom: 10px;
+    width: calc(100% - 20px);
+  }
+  .flex.space-x-1,
+  .flex.space-x-2 {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .pixel-btn {
+    justify-content: center;
+  }
 }
