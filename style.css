@@ -24,6 +24,7 @@ body {
 .header-title {
   font-size: 2.25rem;
   color: #e0e0e0;
+  text-shadow: 2px 2px 0px #333;
 }
 .section-title {
   font-size: 1.75rem;
@@ -44,6 +45,37 @@ body {
   box-shadow: inset 4px 4px 0px 0px #333, inset -4px -4px 0px 0px #777;
 }
 
+/* --- Animações das Abas --- */
+.tab-container {
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.tab-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateX(100px);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+
+.tab-content.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: all;
+  position: relative;
+}
+
+.tab-content.exiting {
+  opacity: 0;
+  transform: translateX(-100px);
+  transition: all 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
 /* --- Abas de Navegação --- */
 .tab-btn {
   background-color: #3a3a3a;
@@ -51,19 +83,53 @@ body {
   padding: 12px 20px;
   font-size: 1.1rem;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  border: 2px solid #555;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 3px solid #555;
   font-family: "VT323", monospace;
+  outline: none;
+  position: relative;
+  overflow: hidden;
 }
+
+.tab-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(234, 179, 8, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.tab-btn:hover::before {
+  left: 100%;
+}
+
 .tab-btn:hover {
   background-color: #4a4a4a;
   color: #e0e0e0;
+  border-color: #777;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
+
 .tab-btn.active {
   background-color: #eab308;
   color: #1a1a1a;
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   border-color: #eab308;
+  box-shadow: 0 6px 12px rgba(234, 179, 8, 0.4), inset -2px -2px 0px 0px #b8860b,
+    inset 2px 2px 0px 0px #fff3cd;
+}
+
+.tab-btn.active::before {
+  display: none;
 }
 
 /* --- Botões --- */
@@ -81,15 +147,42 @@ body {
   box-shadow: inset -2px -2px 0px 0px #333, inset 2px 2px 0px 0px #777;
   text-decoration: none;
   font-family: "VT323", monospace;
+  position: relative;
+  overflow: hidden;
 }
+
+.pixel-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.3s;
+}
+
+.pixel-btn:hover::before {
+  left: 100%;
+}
+
 .pixel-btn:hover {
   background-color: #5a5a5a;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: inset -2px -2px 0px 0px #333, inset 2px 2px 0px 0px #777,
+    0 4px 8px rgba(0, 0, 0, 0.3);
 }
+
 .pixel-btn:active {
-  transform: translateY(2px);
+  transform: translateY(1px);
   box-shadow: inset 2px 2px 0px 0px #333;
 }
+
 .pixel-btn-primary {
   background-color: #0891b2;
   border-color: #06b6d4;
@@ -144,14 +237,32 @@ th {
   color: #eab308;
   font-weight: bold;
   text-transform: uppercase;
+  position: relative;
 }
+
+th::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #eab308, transparent);
+}
+
+tbody tr {
+  transition: all 0.2s ease;
+}
+
 tbody tr:nth-child(even) {
   background-color: #2a2a2a;
 }
 tbody tr:hover {
   background-color: #404040;
-  transition: background-color 0.2s ease;
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
+
 .empty-state {
   display: none;
   padding: 40px;
@@ -159,6 +270,17 @@ tbody tr:hover {
   font-size: 1.25rem;
   color: #777;
   font-style: italic;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* --- Modals --- */
@@ -173,7 +295,20 @@ tbody tr:hover {
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(2px);
+  animation: fadeIn 0.3s ease-out;
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(2px);
+  }
+}
+
 .modal-content {
   background-color: #2c2c2c;
   margin: 5% auto;
@@ -182,7 +317,20 @@ tbody tr:hover {
   max-width: 600px;
   max-height: 85vh;
   overflow-y: auto;
+  animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
 label {
   display: block;
   margin-bottom: 0.5rem;
@@ -200,6 +348,7 @@ textarea {
   font-size: 1.1rem;
   font-family: "VT323", monospace;
   box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 input:focus,
 select:focus,
@@ -207,6 +356,8 @@ textarea:focus {
   outline: 2px solid #eab308;
   border-color: #eab308;
   background-color: #2a2a2a;
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(234, 179, 8, 0.3);
 }
 input::placeholder,
 textarea::placeholder {
@@ -227,7 +378,7 @@ textarea::placeholder {
   font-size: 2.5rem;
   color: #444;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   width: auto;
   margin: 0 2px;
 }
@@ -235,6 +386,8 @@ textarea::placeholder {
 .star-rating label:hover,
 .star-rating label:hover ~ label {
   color: #eab308;
+  transform: scale(1.1);
+  text-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
 }
 
 /* --- Notificações (Toast) --- */
@@ -249,11 +402,48 @@ textarea::placeholder {
   font-family: "VT323", monospace;
   font-size: 1.1rem;
   max-width: 300px;
+  position: relative;
+  overflow: hidden;
 }
+
+.toast::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 2s;
+}
+
 .toast.show {
   opacity: 1;
   transform: translateX(0);
+  animation: toastPulse 0.5s ease-out;
 }
+
+.toast.show::before {
+  left: 100%;
+}
+
+@keyframes toastPulse {
+  0% {
+    transform: translateX(0) scale(1);
+  }
+  50% {
+    transform: translateX(0) scale(1.05);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+  }
+}
+
 .toast-success {
   background-color: #16a34a;
   border-color: #22c55e;
@@ -265,6 +455,104 @@ textarea::placeholder {
 .toast-info {
   background-color: #0891b2;
   border-color: #06b6d4;
+}
+
+/* --- Ajustes para ícones de ações --- */
+.action-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  padding: 4px 6px;
+  margin: 0 2px;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  border-radius: 3px;
+  position: relative;
+}
+
+.action-btn:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.2);
+}
+
+.action-btn.edit:hover {
+  color: #06b6d4;
+  background-color: rgba(6, 182, 212, 0.1);
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+}
+
+.action-btn.delete:hover {
+  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.1);
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.3);
+}
+
+/* --- Scrollbar personalizada --- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* --- Efeitos de Loading --- */
+.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(234, 179, 8, 0.1),
+    transparent
+  );
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* --- Animações de entrada para elementos --- */
+.fade-in {
+  animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- Responsividade --- */
@@ -304,6 +592,18 @@ textarea::placeholder {
   .star-rating label {
     font-size: 2rem;
   }
+
+  .tab-content {
+    transform: translateY(50px);
+  }
+
+  .tab-content.active {
+    transform: translateY(0);
+  }
+
+  .tab-content.exiting {
+    transform: translateY(-50px);
+  }
 }
 
 @media (max-width: 480px) {
@@ -334,6 +634,10 @@ textarea::placeholder {
     padding: 6px;
     font-size: 0.8rem;
   }
+
+  .tab-container {
+    min-height: 300px;
+  }
 }
 
 /* --- Utilitários --- */
@@ -345,48 +649,12 @@ textarea::placeholder {
   text-align: center;
 }
 
-/* --- Ajustes para ícones de ações --- */
-.action-btn {
-  background: none;
-  border: none;
-  color: #aaa;
-  cursor: pointer;
-  padding: 4px 6px;
-  margin: 0 2px;
-  transition: color 0.2s;
-  font-size: 1.2rem;
-  border-radius: 3px;
+/* --- Efeitos especiais para gráficos --- */
+canvas {
+  transition: all 0.3s ease;
 }
 
-.action-btn:hover {
-  color: #fff;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.action-btn.edit:hover {
-  color: #06b6d4;
-  background-color: rgba(6, 182, 212, 0.1);
-}
-
-.action-btn.delete:hover {
-  color: #dc2626;
-  background-color: rgba(220, 38, 38, 0.1);
-}
-
-/* --- Scrollbar personalizada --- */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1a1a1a;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #777;
+canvas:hover {
+  transform: scale(1.02);
+  filter: brightness(1.1);
 }

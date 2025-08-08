@@ -5,7 +5,7 @@ if (typeof Chart !== "undefined") {
   Chart.defaults.borderColor = "#555";
 }
 
-// --- Gerenciamento de Estado ---
+// --- Gerenciamento de Estado com Persistência ---
 class GameManager {
   constructor() {
     this.state = {
@@ -16,14 +16,73 @@ class GameManager {
     this.interesseChart = null;
     this.notaChart = null;
     this.motivoChart = null;
+    this.currentTab = "tabQueroJogar";
     this.init();
   }
 
   init() {
+    this.loadData();
     this.createCharts();
     this.renderTables();
     this.switchTab("tabQueroJogar");
     this.bindEvents();
+    this.addFadeInAnimation();
+  }
+
+  // --- Animações de Interface ---
+  addFadeInAnimation() {
+    const elements = document.querySelectorAll(
+      ".section-title, .pixel-btn, .table-container"
+    );
+    elements.forEach((el, index) => {
+      setTimeout(() => {
+        el.classList.add("fade-in");
+      }, index * 100);
+    });
+  }
+
+  // --- Persistência de Dados com localStorage ---
+  saveData() {
+    try {
+      if (typeof Storage !== "undefined") {
+        localStorage.setItem("gameManagerData", JSON.stringify(this.state));
+        console.log("Dados salvos no localStorage!");
+      } else {
+        // Fallback para ambientes sem localStorage
+        window.gameData = JSON.stringify(this.state);
+        console.log("Dados salvos em memória!");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar dados:", error);
+      // Fallback em caso de erro
+      window.gameData = JSON.stringify(this.state);
+    }
+  }
+
+  loadData() {
+    try {
+      let savedData = null;
+
+      if (typeof Storage !== "undefined") {
+        savedData = localStorage.getItem("gameManagerData");
+      } else {
+        // Fallback para ambientes sem localStorage
+        savedData = window.gameData;
+      }
+
+      if (savedData) {
+        this.state = JSON.parse(savedData);
+        console.log("Dados carregados com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+      // Em caso de erro, manter dados padrão
+      this.state = {
+        queroJogar: [],
+        zerados: [],
+        desistidos: [],
+      };
+    }
   }
 
   // --- Funções de Gráficos ---
@@ -53,6 +112,12 @@ class GameManager {
         options: {
           responsive: true,
           maintainAspectRatio: true,
+          animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 1000,
+            easing: "easeOutQuart",
+          },
           plugins: {
             legend: {
               position: "top",
@@ -87,6 +152,10 @@ class GameManager {
           responsive: true,
           maintainAspectRatio: true,
           indexAxis: "y",
+          animation: {
+            duration: 1000,
+            easing: "easeOutQuart",
+          },
           scales: {
             x: {
               beginAtZero: true,
@@ -122,6 +191,12 @@ class GameManager {
         options: {
           responsive: true,
           maintainAspectRatio: true,
+          animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 1000,
+            easing: "easeOutQuart",
+          },
           plugins: {
             legend: {
               position: "top",
@@ -150,7 +225,7 @@ class GameManager {
 
       this.interesseChart.data.labels = Object.keys(interesseCount);
       this.interesseChart.data.datasets[0].data = Object.values(interesseCount);
-      this.interesseChart.update();
+      this.interesseChart.update("active");
     }
 
     // Gráfico de notas
@@ -164,13 +239,15 @@ class GameManager {
       );
 
       this.notaChart.data.datasets[0].data = notaCount;
-      this.notaChart.update();
+      this.notaChart.update("active");
     }
 
-    // Estatísticas
+    // Estatísticas com animação
     const totalZerados = this.state.zerados.length;
     const totalZeradosEl = document.getElementById("totalZerados");
-    if (totalZeradosEl) totalZeradosEl.textContent = totalZerados;
+    if (totalZeradosEl) {
+      this.animateNumber(totalZeradosEl, 0, totalZerados, 1000);
+    }
 
     const totalHoras = this.state.zerados.reduce(
       (sum, game) => sum + (parseInt(game.tempoGasto) || 0),
@@ -178,8 +255,9 @@ class GameManager {
     );
     const tempoMedioEl = document.getElementById("tempoMedio");
     if (tempoMedioEl) {
-      tempoMedioEl.textContent =
-        totalZerados > 0 ? `${(totalHoras / totalZerados).toFixed(1)}h` : "0h";
+      const tempoMedio =
+        totalZerados > 0 ? (totalHoras / totalZerados).toFixed(1) : 0;
+      this.animateNumber(tempoMedioEl, 0, parseFloat(tempoMedio), 1000, "h");
     }
 
     // Gráfico de motivos de desistência
@@ -191,8 +269,32 @@ class GameManager {
 
       this.motivoChart.data.labels = Object.keys(motivoCount);
       this.motivoChart.data.datasets[0].data = Object.values(motivoCount);
-      this.motivoChart.update();
+      this.motivoChart.update("active");
     }
+  }
+
+  // --- Animação de números ---
+  animateNumber(element, start, end, duration, suffix = "") {
+    const startTime = performance.now();
+    const difference = end - start;
+
+    const step = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Easing function
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const current = start + difference * easeOutQuart;
+
+      element.textContent =
+        (suffix === "h" ? current.toFixed(1) : Math.floor(current)) + suffix;
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    requestAnimationFrame(step);
   }
 
   // --- Funções de Renderização ---
@@ -243,8 +345,18 @@ class GameManager {
       emptyStateEl.style.display = "none";
       table.style.display = "table";
 
-      this.state[stateKey].forEach((item) => {
+      this.state[stateKey].forEach((item, index) => {
         const tr = document.createElement("tr");
+
+        // Adiciona animação de entrada para as linhas
+        tr.style.opacity = "0";
+        tr.style.transform = "translateY(20px)";
+
+        setTimeout(() => {
+          tr.style.transition = "all 0.3s ease";
+          tr.style.opacity = "1";
+          tr.style.transform = "translateY(0)";
+        }, index * 50);
 
         const cellsHTML = columns
           .map((col) => {
@@ -365,7 +477,13 @@ class GameManager {
 
   closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) modal.style.display = "none";
+    if (modal) {
+      modal.style.animation = "fadeOut 0.3s ease-out";
+      setTimeout(() => {
+        modal.style.display = "none";
+        modal.style.animation = "";
+      }, 300);
+    }
   }
 
   // --- Componentes de UI ---
@@ -381,7 +499,11 @@ class GameManager {
     setTimeout(() => toast.classList.add("show"), 10);
     setTimeout(() => {
       toast.classList.remove("show");
-      toast.addEventListener("transitionend", () => toast.remove());
+      toast.addEventListener("transitionend", () => {
+        if (toast.parentNode) {
+          toast.remove();
+        }
+      });
     }, 3000);
   }
 
@@ -418,26 +540,56 @@ class GameManager {
       this.state[stateKey] = this.state[stateKey].filter(
         (item) => item.id !== itemId
       );
+      this.saveData();
       this.renderTables();
       this.showToast(`"${itemName}" foi apagado.`, "error");
     });
   }
 
-  // --- Navegação por Abas ---
+  // --- Navegação por Abas com Animação ---
   switchTab(targetId) {
-    const tabs = document.querySelectorAll(".tab-content");
+    if (this.currentTab === targetId) return;
+
+    const currentTabContent = document.getElementById(this.currentTab);
+    const targetTabContent = document.getElementById(targetId);
     const tabBtns = document.querySelectorAll(".tab-btn");
 
-    tabs.forEach((tab) => {
-      tab.style.display = tab.id === targetId ? "block" : "none";
+    // Remover classe active de todos os botões
+    tabBtns.forEach((btn) => {
+      btn.classList.remove("active");
     });
 
-    tabBtns.forEach((btn) => {
-      btn.classList.toggle(
-        "active",
-        btn.id === `tabBtn${targetId.replace("tab", "")}`
-      );
-    });
+    // Adicionar classe active ao botão clicado
+    const targetBtn = document.getElementById(
+      `tabBtn${targetId.replace("tab", "")}`
+    );
+    if (targetBtn) {
+      targetBtn.classList.add("active");
+    }
+
+    // Animação de saída da aba atual
+    if (currentTabContent) {
+      currentTabContent.classList.add("exiting");
+      currentTabContent.classList.remove("active");
+    }
+
+    // Após a animação de saída, mostrar a nova aba
+    setTimeout(() => {
+      if (currentTabContent) {
+        currentTabContent.classList.remove("exiting");
+      }
+
+      if (targetTabContent) {
+        targetTabContent.classList.add("active");
+      }
+
+      this.currentTab = targetId;
+
+      // Recriar gráficos se necessário para a nova aba
+      setTimeout(() => {
+        this.updateCharts();
+      }, 100);
+    }, 300);
   }
 
   // --- Exportação CSV ---
@@ -447,26 +599,38 @@ class GameManager {
       return;
     }
 
-    const csvRows = [headers.join(",")];
-    for (const item of data) {
-      const values = headers.map(
-        (header) => `"${(item[header] || "").toString().replace(/"/g, '""')}"`
-      );
-      csvRows.push(values.join(","));
+    // Adiciona animação de loading
+    const exportBtn = event?.target;
+    if (exportBtn) {
+      exportBtn.classList.add("loading");
     }
 
-    const blob = new Blob(["\uFEFF" + csvRows.join("\n")], {
-      type: "text/csv;charset=utf-8;",
-    });
+    setTimeout(() => {
+      const csvRows = [headers.join(",")];
+      for (const item of data) {
+        const values = headers.map(
+          (header) => `"${(item[header] || "").toString().replace(/"/g, '""')}"`
+        );
+        csvRows.push(values.join(","));
+      }
 
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const blob = new Blob(["\uFEFF" + csvRows.join("\n")], {
+        type: "text/csv;charset=utf-8;",
+      });
 
-    this.showToast(`${filename} exportado!`);
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      if (exportBtn) {
+        exportBtn.classList.remove("loading");
+      }
+
+      this.showToast(`${filename} exportado!`);
+    }, 500);
   }
 
   // --- Event Listeners ---
@@ -521,6 +685,7 @@ class GameManager {
           this.state.queroJogar.push(gameData);
         }
 
+        this.saveData();
         this.renderTables();
         this.closeModal("modalQueroJogar");
         this.showToast(`"${gameData.nome}" foi salvo!`);
@@ -548,6 +713,7 @@ class GameManager {
         this.state.zerados.push(gameData);
       }
 
+      this.saveData();
       this.renderTables();
       this.closeModal("modalZerados");
       this.showToast(`"${gameData.nome}" foi salvo!`);
@@ -574,6 +740,7 @@ class GameManager {
           this.state.desistidos.push(gameData);
         }
 
+        this.saveData();
         this.renderTables();
         this.closeModal("modalDesistidos");
         this.showToast(`"${gameData.nome}" foi salvo!`);
@@ -582,7 +749,7 @@ class GameManager {
     // Botões de exportação
     document
       .getElementById("exportQueroJogarBtn")
-      ?.addEventListener("click", () =>
+      ?.addEventListener("click", (e) =>
         this.exportToCsv(this.state.queroJogar, "jogos_para_jogar.csv", [
           "nome",
           "categoria",
@@ -598,7 +765,7 @@ class GameManager {
 
     document
       .getElementById("exportZeradosBtn")
-      ?.addEventListener("click", () =>
+      ?.addEventListener("click", (e) =>
         this.exportToCsv(this.state.zerados, "jogos_zerados.csv", [
           "nome",
           "categoria",
@@ -612,7 +779,7 @@ class GameManager {
 
     document
       .getElementById("exportDesistidosBtn")
-      ?.addEventListener("click", () =>
+      ?.addEventListener("click", (e) =>
         this.exportToCsv(this.state.desistidos, "jogos_desistidos.csv", [
           "nome",
           "categoria",
@@ -625,8 +792,48 @@ class GameManager {
     // Fechar modal ao clicar fora
     window.addEventListener("click", (event) => {
       if (event.target.classList.contains("modal")) {
-        event.target.style.display = "none";
+        const modalId = event.target.id;
+        this.closeModal(modalId);
       }
+    });
+
+    // Atalhos de teclado
+    document.addEventListener("keydown", (e) => {
+      // ESC para fechar modals
+      if (e.key === "Escape") {
+        const openModal = document.querySelector(".modal[style*='block']");
+        if (openModal) {
+          this.closeModal(openModal.id);
+        }
+      }
+
+      // Atalhos para navegação (Ctrl + 1/2/3)
+      if (e.ctrlKey) {
+        switch (e.key) {
+          case "1":
+            e.preventDefault();
+            this.switchTab("tabQueroJogar");
+            break;
+          case "2":
+            e.preventDefault();
+            this.switchTab("tabZerados");
+            break;
+          case "3":
+            e.preventDefault();
+            this.switchTab("tabDesistidos");
+            break;
+        }
+      }
+    });
+
+    // Auto-save periódico (a cada 30 segundos)
+    setInterval(() => {
+      this.saveData();
+    }, 30000);
+
+    // Salvar antes de fechar a página
+    window.addEventListener("beforeunload", () => {
+      this.saveData();
     });
   }
 }
@@ -638,3 +845,19 @@ let gameManager;
 document.addEventListener("DOMContentLoaded", () => {
   gameManager = new GameManager();
 });
+
+// Adicionar CSS para fadeOut animation
+const style = document.createElement("style");
+style.textContent = `
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    backdrop-filter: blur(2px);
+  }
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+}
+`;
+document.head.appendChild(style);

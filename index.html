@@ -29,10 +29,10 @@
         <button id="tabBtnDesistidos" class="tab-btn">Desistidos</button>
       </div>
 
-      <!-- Conteúdo das Abas -->
-      <main>
+      <!-- Container das Abas com Animação -->
+      <div class="tab-container">
         <!-- Aba 1: Quero Jogar -->
-        <div id="tabQueroJogar" class="tab-content">
+        <div id="tabQueroJogar" class="tab-content active">
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div class="lg:col-span-3">
               <h2 class="section-title text-cyan-400">Lista de Desejos</h2>
@@ -80,7 +80,7 @@
         </div>
 
         <!-- Aba 2: Jogos Zerados -->
-        <div id="tabZerados" class="tab-content hidden">
+        <div id="tabZerados" class="tab-content">
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div class="lg:col-span-3">
               <h2 class="section-title text-green-400">Hall da Fama</h2>
@@ -134,7 +134,7 @@
         </div>
 
         <!-- Aba 3: Jogos Desistidos -->
-        <div id="tabDesistidos" class="tab-content hidden">
+        <div id="tabDesistidos" class="tab-content">
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div class="lg:col-span-3">
               <h2 class="section-title text-red-400">Cemitério de Jogos</h2>
@@ -176,7 +176,7 @@
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
 
     <!-- Modals de Formulário -->
