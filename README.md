@@ -117,7 +117,7 @@
   - [ ] Login e logout
   - [ ] Armazenamento separado para cada usuário
 - [ ] Versão mobile otimizada para toque
-- [ ] Validação de formulários
+- [x] Validação de formulários
 - [ ] Adicionar suporte a imagens/capas dos jogos
 - [ ] Criar sistema de backup/importação de dados
 - [ ] Melhorar filtros e ordenação das tabelas
