@@ -190,32 +190,39 @@
         <form id="formQueroJogar" class="space-y-4">
           <input type="hidden" id="queroJogarId" />
           <div>
-            <label for="qjNome">Nome do Jogo</label>
-            <input type="text" id="qjNome" required />
+            <label for="qjNome"
+              >Nome do Jogo <span class="text-red-400">*</span></label
+            >
+            <input type="text" id="qjNome" required maxlength="100" />
+            <div class="field-error" id="qjNome-error"></div>
           </div>
           <div>
             <label for="qjCategoria">Categoria</label>
-            <input type="text" id="qjCategoria" />
+            <input type="text" id="qjCategoria" maxlength="50" />
           </div>
           <div>
             <label for="qjSubcategoria">Subcategoria</label>
-            <input type="text" id="qjSubcategoria" />
+            <input type="text" id="qjSubcategoria" maxlength="50" />
           </div>
           <div>
             <label for="qjDataLancamento">Data de Lançamento</label>
-            <input type="text" id="qjDataLancamento" />
+            <input type="text" id="qjDataLancamento" maxlength="20" />
           </div>
           <div>
-            <label for="qjInteresse">Interesse</label>
-            <select id="qjInteresse">
+            <label for="qjInteresse"
+              >Interesse <span class="text-red-400">*</span></label
+            >
+            <select id="qjInteresse" required>
+              <option value="">Selecione...</option>
               <option value="Baixo">Baixo</option>
-              <option value="Médio" selected>Médio</option>
+              <option value="Médio">Médio</option>
               <option value="Alto">Alto</option>
             </select>
+            <div class="field-error" id="qjInteresse-error"></div>
           </div>
           <div>
             <label for="qjPlataformas">Plataformas</label>
-            <input type="text" id="qjPlataformas" />
+            <input type="text" id="qjPlataformas" maxlength="100" />
           </div>
           <div>
             <label for="qjStatus">Status</label>
@@ -227,18 +234,14 @@
           </div>
           <div>
             <label for="qjTempoEstimado">Tempo Estimado (h)</label>
-            <input type="number" id="qjTempoEstimado" />
+            <input type="number" id="qjTempoEstimado" min="0" max="9999" />
           </div>
           <div>
             <label for="qjObservacoes">Observações</label>
-            <textarea id="qjObservacoes" rows="3"></textarea>
+            <textarea id="qjObservacoes" rows="3" maxlength="500"></textarea>
           </div>
           <div class="flex justify-end space-x-2 pt-4">
-            <button
-              type="button"
-              class="pixel-btn"
-              onclick="gameManager.closeModal('modalQueroJogar')"
-            >
+            <button type="button" class="pixel-btn modal-cancel-btn">
               Cancelar
             </button>
             <button type="submit" class="pixel-btn pixel-btn-primary">
@@ -255,15 +258,20 @@
         <form id="formZerados" class="space-y-4">
           <input type="hidden" id="zeradoId" />
           <div>
-            <label for="zNome">Nome do Jogo</label>
-            <input type="text" id="zNome" required />
+            <label for="zNome"
+              >Nome do Jogo <span class="text-red-400">*</span></label
+            >
+            <input type="text" id="zNome" required maxlength="100" />
+            <div class="field-error" id="zNome-error"></div>
           </div>
           <div>
             <label for="zCategoria">Categoria</label>
-            <input type="text" id="zCategoria" />
+            <input type="text" id="zCategoria" maxlength="50" />
           </div>
           <div>
-            <p class="mb-2">Nota (0-5 estrelas)</p>
+            <p class="mb-2">
+              Nota (0-5 estrelas) <span class="text-red-400">*</span>
+            </p>
             <div class="star-rating">
               <input type="radio" id="5-stars" name="rating" value="5" />
               <label for="5-stars">★</label>
@@ -276,29 +284,31 @@
               <input type="radio" id="1-star" name="rating" value="1" />
               <label for="1-star">★</label>
             </div>
+            <div class="field-error" id="rating-error"></div>
           </div>
           <div>
             <label for="zDataZerei">Data em que zerei</label>
-            <input type="text" id="zDataZerei" placeholder="DD/MM/AAAA" />
+            <input
+              type="text"
+              id="zDataZerei"
+              placeholder="DD/MM/AAAA"
+              maxlength="10"
+            />
           </div>
           <div>
             <label for="zPlataforma">Plataforma</label>
-            <input type="text" id="zPlataforma" />
+            <input type="text" id="zPlataforma" maxlength="50" />
           </div>
           <div>
             <label for="zTempoGasto">Tempo Gasto (h)</label>
-            <input type="number" id="zTempoGasto" />
+            <input type="number" id="zTempoGasto" min="0" max="9999" />
           </div>
           <div>
             <label for="zAvaliacao">Avaliação</label>
-            <textarea id="zAvaliacao" rows="3"></textarea>
+            <textarea id="zAvaliacao" rows="3" maxlength="500"></textarea>
           </div>
           <div class="flex justify-end space-x-2 pt-4">
-            <button
-              type="button"
-              class="pixel-btn"
-              onclick="gameManager.closeModal('modalZerados')"
-            >
+            <button type="button" class="pixel-btn modal-cancel-btn">
               Cancelar
             </button>
             <button type="submit" class="pixel-btn pixel-btn-success">
@@ -315,37 +325,40 @@
         <form id="formDesistidos" class="space-y-4">
           <input type="hidden" id="desistidoId" />
           <div>
-            <label for="dNome">Nome do Jogo</label>
-            <input type="text" id="dNome" required />
+            <label for="dNome"
+              >Nome do Jogo <span class="text-red-400">*</span></label
+            >
+            <input type="text" id="dNome" required maxlength="100" />
+            <div class="field-error" id="dNome-error"></div>
           </div>
           <div>
             <label for="dCategoria">Categoria</label>
-            <input type="text" id="dCategoria" />
+            <input type="text" id="dCategoria" maxlength="50" />
           </div>
           <div>
-            <label for="dMotivo">Motivo</label>
-            <select id="dMotivo">
+            <label for="dMotivo"
+              >Motivo <span class="text-red-400">*</span></label
+            >
+            <select id="dMotivo" required>
+              <option value="">Selecione...</option>
               <option value="Chato">Chato / Entediante</option>
               <option value="Difícil">Muito Difícil</option>
               <option value="Bugs">Bugs / Problemas</option>
               <option value="Sem Tempo">Falta de Tempo</option>
               <option value="Outro">Outro</option>
             </select>
+            <div class="field-error" id="dMotivo-error"></div>
           </div>
           <div>
             <label for="dTempoGameplay">Tempo de Gameplay (h)</label>
-            <input type="number" id="dTempoGameplay" />
+            <input type="number" id="dTempoGameplay" min="0" max="9999" />
           </div>
           <div>
             <label for="dObservacoes">Observações</label>
-            <textarea id="dObservacoes" rows="3"></textarea>
+            <textarea id="dObservacoes" rows="3" maxlength="500"></textarea>
           </div>
           <div class="flex justify-end space-x-2 pt-4">
-            <button
-              type="button"
-              class="pixel-btn"
-              onclick="gameManager.closeModal('modalDesistidos')"
-            >
+            <button type="button" class="pixel-btn modal-cancel-btn">
               Cancelar
             </button>
             <button type="submit" class="pixel-btn pixel-btn-danger">
@@ -353,6 +366,21 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Modal de Visualização -->
+    <div id="modalView" class="modal">
+      <div class="modal-content pixel-border">
+        <h3 class="modal-title text-purple-400">Detalhes do Jogo</h3>
+        <div id="viewContent" class="space-y-4">
+          <!-- Conteúdo será preenchido dinamicamente -->
+        </div>
+        <div class="flex justify-end space-x-2 pt-4">
+          <button type="button" class="pixel-btn modal-cancel-btn">
+            Fechar
+          </button>
+        </div>
       </div>
     </div>
 
