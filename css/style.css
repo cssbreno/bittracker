@@ -15,7 +15,6 @@ body {
   background-size: 25px 25px;
 }
 
-/* --- NOVO --- Classe para travar o scroll do body quando um modal está aberto */
 body.modal-open {
   overflow: hidden;
 }
@@ -277,6 +276,29 @@ tbody tr:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* --- NOVO --- Estilo para botões de ação na tabela */
+.action-btn {
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0 4px;
+  transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+.action-btn:hover {
+  transform: scale(1.2);
+}
+.action-btn.view:hover {
+  color: #22d3ee; /* Cyan */
+}
+.action-btn.edit:hover {
+  color: #facc15; /* Yellow */
+}
+.action-btn.delete:hover {
+  color: #ef4444; /* Red */
+}
+
 .empty-state {
   display: none;
   padding: 40px;
@@ -334,7 +356,6 @@ tbody tr:hover {
   animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* --- NOVO --- Estilo para detalhes no modal de visualização */
 #viewContent p {
   border-bottom: 1px dashed #555;
   padding-bottom: 0.75rem;
@@ -629,7 +650,6 @@ textarea.error:focus {
   .pixel-btn {
     justify-content: center;
   }
-  /* --- NOVO --- Ajuste no modal de visualização para telas menores */
   #viewContent p strong {
     min-width: 110px;
   }

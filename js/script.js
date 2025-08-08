@@ -196,7 +196,7 @@ class GameManager {
   init() {
     this.loadData();
     this.createCharts();
-    this.setupSearchableDropdowns(); // Mover para antes de render e bind
+    this.setupSearchableDropdowns();
     this.renderTables();
     this.switchTab("tabQueroJogar");
     this.bindEvents();
@@ -231,7 +231,7 @@ class GameManager {
     });
   }
 
-  // --- Gráficos (com responsividade melhorada) ---
+  // --- Gráficos ---
   createCharts() {
     if (typeof Chart === "undefined") return;
 
@@ -409,6 +409,8 @@ class GameManager {
           .join("");
         tr.innerHTML = cellsHTML;
         const actionsCell = document.createElement("td");
+
+        // --- AJUSTE --- Adicionada a classe 'action-btn' para estilização do hover
         const viewBtn = document.createElement("button");
         viewBtn.className = "action-btn view";
         viewBtn.innerHTML = "👁️";
@@ -416,6 +418,7 @@ class GameManager {
         viewBtn.addEventListener("click", () =>
           this.openViewModal(stateKey, item.id)
         );
+
         const editBtn = document.createElement("button");
         editBtn.className = "action-btn edit";
         editBtn.innerHTML = "✏️";
@@ -426,6 +429,7 @@ class GameManager {
           }`;
           this.openModal(modalId, item.id);
         });
+
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "action-btn delete";
         deleteBtn.innerHTML = "🗑️";
@@ -433,6 +437,7 @@ class GameManager {
         deleteBtn.addEventListener("click", () =>
           this.deleteItem(stateKey, item.id, item.nome)
         );
+
         actionsCell.appendChild(viewBtn);
         actionsCell.appendChild(editBtn);
         actionsCell.appendChild(deleteBtn);
@@ -451,7 +456,6 @@ class GameManager {
     form.reset();
     FormValidator.clearErrors(form);
 
-    // Limpa e reseta os dropdowns customizados
     form.querySelectorAll(".searchable-dropdown").forEach((dropdown) => {
       this.updateSearchableDropdown(dropdown, "");
     });
@@ -469,7 +473,6 @@ class GameManager {
         item = this.state.desistidos.find((g) => g.id === itemId);
     }
 
-    // Preenche campos comuns
     Object.keys(item).forEach((key) => {
       const el =
         form.querySelector(
@@ -494,7 +497,6 @@ class GameManager {
       }
     });
 
-    // Preenche campos específicos
     if (modalId === "modalZerados") {
       const checkedStar = form.querySelector('input[name="rating"]:checked');
       if (checkedStar) checkedStar.checked = false;
@@ -506,7 +508,6 @@ class GameManager {
       }
     }
 
-    // Renomeia os campos para o padrão do formulário
     Object.entries({
       qjNome: item.nome,
       zNome: item.nome,
@@ -542,12 +543,10 @@ class GameManager {
       }
     });
 
-    // --- CORREÇÃO --- Adiciona classe para travar o scroll do body
     document.body.classList.add("modal-open");
     modal.style.display = "block";
   }
 
-  // --- NOVO --- Função para abrir o modal de visualização
   openViewModal(stateKey, itemId) {
     const modal = document.getElementById("modalView");
     const contentEl = document.getElementById("viewContent");
@@ -559,7 +558,6 @@ class GameManager {
       return;
     }
 
-    // Mapeamento de chaves para rótulos amigáveis
     const labels = {
       nome: "Nome",
       categoria: "Categoria",
@@ -579,7 +577,7 @@ class GameManager {
       tempoGameplay: "Tempo de Gameplay (h)",
     };
 
-    contentEl.innerHTML = ""; // Limpa conteúdo anterior
+    contentEl.innerHTML = "";
 
     for (const key in item) {
       if (Object.hasOwnProperty.call(item, key) && labels[key] && item[key]) {
@@ -587,7 +585,6 @@ class GameManager {
         let value = item[key];
 
         if (key === "nota") {
-          // Tratamento especial para nota em estrelas
           value = "★".repeat(value || 0) + "☆".repeat(5 - (value || 0));
         }
 
@@ -596,7 +593,6 @@ class GameManager {
       }
     }
 
-    // --- CORREÇÃO --- Adiciona classe para travar o scroll do body
     document.body.classList.add("modal-open");
     modal.style.display = "block";
   }
@@ -605,7 +601,6 @@ class GameManager {
     const modal = document.getElementById(modalId);
     if (modal) {
       modal.style.display = "none";
-      // --- CORREÇÃO --- Remove classe para restaurar o scroll do body
       document.body.classList.remove("modal-open");
     }
   }
@@ -630,7 +625,6 @@ class GameManager {
     if (!modal || !messageEl) return;
     messageEl.textContent = message;
 
-    // --- CORREÇÃO --- Adiciona classe para travar o scroll do body
     document.body.classList.add("modal-open");
     modal.style.display = "block";
 
@@ -642,7 +636,7 @@ class GameManager {
     };
     const handleNo = () => cleanup();
     const cleanup = () => {
-      this.closeModal("confirmModal"); // Usa a função closeModal para garantir a remoção da classe
+      this.closeModal("confirmModal");
       yesBtn?.removeEventListener("click", handleYes);
       noBtn?.removeEventListener("click", handleNo);
     };
@@ -697,14 +691,57 @@ class GameManager {
   }
 
   // --- Exportação ---
+  // --- CORREÇÃO --- Lógica completa da função de exportação para CSV
   exportToCsv(data, filename, headers) {
-    /* ...código mantido... */
+    if (!data || data.length === 0) {
+      this.showToast("Não há dados para exportar.", "error");
+      return;
+    }
+
+    const headerKeys = Object.keys(headers);
+    const headerTitles = Object.values(headers);
+
+    const escapeCsvCell = (cell) => {
+      if (cell === null || cell === undefined) {
+        return "";
+      }
+      const strCell = String(cell);
+      // Se a célula contém vírgula, aspas ou quebra de linha, a envolvemos em aspas
+      if (
+        strCell.includes(",") ||
+        strCell.includes('"') ||
+        strCell.includes("\n")
+      ) {
+        // Substitui aspas duplas por duas aspas duplas
+        return `"${strCell.replace(/"/g, '""')}"`;
+      }
+      return strCell;
+    };
+
+    const csvRows = [
+      headerTitles.join(","), // Cabeçalho
+      ...data.map((row) =>
+        headerKeys.map((key) => escapeCsvCell(row[key])).join(",")
+      ),
+    ];
+
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   }
 
-  // =================================================================================
-  //  NOVAS FUNÇÕES: Dropdown com Pesquisa e API
-  // =================================================================================
-
+  // --- Dropdown com Pesquisa e API ---
   createSearchableDropdown(
     containerId,
     options,
@@ -941,6 +978,58 @@ class GameManager {
         if (openModal) this.closeModal(openModal.id);
       }
     });
+
+    // --- CORREÇÃO --- Event Listeners para os botões de exportação
+    document
+      .getElementById("exportQueroJogarBtn")
+      ?.addEventListener("click", () => {
+        const headers = {
+          nome: "Nome",
+          categoria: "Categoria",
+          subcategoria: "Subcategoria",
+          dataLancamento: "Lançamento",
+          interesse: "Interesse",
+          plataformas: "Plataformas",
+          status: "Status",
+          tempoEstimado: "Tempo Estimado (h)",
+          observacoes: "Observações",
+        };
+        this.exportToCsv(
+          this.state.queroJogar,
+          "lista_de_desejos.csv",
+          headers
+        );
+      });
+    document
+      .getElementById("exportZeradosBtn")
+      ?.addEventListener("click", () => {
+        const headers = {
+          nome: "Nome",
+          categoria: "Categoria",
+          nota: "Nota (1-5)",
+          dataZerei: "Data Zerado",
+          plataforma: "Plataforma",
+          tempoGasto: "Tempo Gasto (h)",
+          avaliacao: "Avaliação",
+        };
+        this.exportToCsv(this.state.zerados, "jogos_zerados.csv", headers);
+      });
+    document
+      .getElementById("exportDesistidosBtn")
+      ?.addEventListener("click", () => {
+        const headers = {
+          nome: "Nome",
+          categoria: "Categoria",
+          motivo: "Motivo",
+          tempoGameplay: "Tempo Jogado (h)",
+          observacoes: "Observações",
+        };
+        this.exportToCsv(
+          this.state.desistidos,
+          "jogos_desistidos.csv",
+          headers
+        );
+      });
 
     // Autocomplete da API
     ["qjNome", "zNome", "dNome"].forEach((id) => {
