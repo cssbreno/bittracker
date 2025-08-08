@@ -3,19 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spreadsheet Gamer</title>
+    <title>Bit Tracker</title>
 
     <base href="/bittracker/" />
 
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-    <!-- CSS customizado -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="p-4 sm:p-8">
@@ -24,8 +21,7 @@
         <h1 class="header-title">Planilha de Games</h1>
       </header>
 
-      <!-- Abas de Navegação -->
-      <div class="flex justify-center space-x-1 mb-6">
+      <div class="flex justify-center flex-wrap space-x-1 mb-6">
         <button id="tabBtnQueroJogar" class="tab-btn active">
           Quero Jogar
         </button>
@@ -33,9 +29,7 @@
         <button id="tabBtnDesistidos" class="tab-btn">Desistidos</button>
       </div>
 
-      <!-- Container das Abas com Animação -->
       <div class="tab-container">
-        <!-- Aba 1: Quero Jogar -->
         <div id="tabQueroJogar" class="tab-content active">
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div class="lg:col-span-3">
@@ -76,14 +70,13 @@
             </div>
             <div class="lg:col-span-1">
               <h2 class="section-title text-cyan-400">Hype-o-Meter</h2>
-              <div class="pixel-border-inset p-4 bg-[#1a1a1a]">
+              <div class="pixel-border-inset p-4 bg-[#1a1a1a] chart-container">
                 <canvas id="interesseChart"></canvas>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Aba 2: Jogos Zerados -->
         <div id="tabZerados" class="tab-content">
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div class="lg:col-span-3">
@@ -121,8 +114,10 @@
             <div class="lg:col-span-1">
               <h2 class="section-title text-green-400">Estatísticas</h2>
               <div class="pixel-border-inset p-4 bg-[#1a1a1a] space-y-4">
-                <canvas id="notaChart"></canvas>
-                <div id="statsZerados" class="text-xl mt-4">
+                <div class="chart-container">
+                  <canvas id="notaChart"></canvas>
+                </div>
+                <div id="statsZerados" class="text-xl mt-4 text-center">
                   <p>
                     Total Zerado:
                     <span class="text-yellow-400" id="totalZerados">0</span>
@@ -137,7 +132,6 @@
           </div>
         </div>
 
-        <!-- Aba 3: Jogos Desistidos -->
         <div id="tabDesistidos" class="tab-content">
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div class="lg:col-span-3">
@@ -174,7 +168,7 @@
             </div>
             <div class="lg:col-span-1">
               <h2 class="section-title text-red-400">Análise de Desistência</h2>
-              <div class="pixel-border-inset p-4 bg-[#1a1a1a]">
+              <div class="pixel-border-inset p-4 bg-[#1a1a1a] chart-container">
                 <canvas id="motivoChart"></canvas>
               </div>
             </div>
@@ -183,46 +177,55 @@
       </div>
     </div>
 
-    <!-- Modals de Formulário -->
     <div id="modalQueroJogar" class="modal">
       <div class="modal-content pixel-border">
         <h3 class="modal-title text-cyan-400">Novo Jogo na Lista</h3>
         <form id="formQueroJogar" class="space-y-4">
           <input type="hidden" id="queroJogarId" />
-          <div>
+          <div style="position: relative">
             <label for="qjNome"
               >Nome do Jogo <span class="text-red-400">*</span></label
             >
-            <input type="text" id="qjNome" required maxlength="100" />
+            <input
+              type="text"
+              id="qjNome"
+              required
+              maxlength="100"
+              placeholder="Ex: Elden Ring"
+              autocomplete="off"
+            />
+            <div class="autocomplete-results" id="qjNome-autocomplete"></div>
             <div class="field-error" id="qjNome-error"></div>
           </div>
-          <div>
+          <div id="qjCategoria-container">
             <label for="qjCategoria">Categoria</label>
-            <input type="text" id="qjCategoria" maxlength="50" />
           </div>
-          <div>
+          <div id="qjSubcategoria-container">
             <label for="qjSubcategoria">Subcategoria</label>
-            <input type="text" id="qjSubcategoria" maxlength="50" />
           </div>
           <div>
             <label for="qjDataLancamento">Data de Lançamento</label>
-            <input type="text" id="qjDataLancamento" maxlength="20" />
+            <input
+              type="text"
+              id="qjDataLancamento"
+              maxlength="20"
+              placeholder="Ex: 25/02/2022 ou Em breve"
+            />
           </div>
           <div>
             <label for="qjInteresse"
               >Interesse <span class="text-red-400">*</span></label
             >
             <select id="qjInteresse" required>
-              <option value="">Selecione...</option>
+              <option value="" disabled>Selecione o nível...</option>
               <option value="Baixo">Baixo</option>
-              <option value="Médio">Médio</option>
+              <option value="Médio" selected>Médio</option>
               <option value="Alto">Alto</option>
             </select>
             <div class="field-error" id="qjInteresse-error"></div>
           </div>
-          <div>
+          <div id="qjPlataformas-container">
             <label for="qjPlataformas">Plataformas</label>
-            <input type="text" id="qjPlataformas" maxlength="100" />
           </div>
           <div>
             <label for="qjStatus">Status</label>
@@ -234,11 +237,22 @@
           </div>
           <div>
             <label for="qjTempoEstimado">Tempo Estimado (h)</label>
-            <input type="number" id="qjTempoEstimado" min="0" max="9999" />
+            <input
+              type="number"
+              id="qjTempoEstimado"
+              min="0"
+              max="9999"
+              placeholder="Ex: 80"
+            />
           </div>
           <div>
             <label for="qjObservacoes">Observações</label>
-            <textarea id="qjObservacoes" rows="3" maxlength="500"></textarea>
+            <textarea
+              id="qjObservacoes"
+              rows="3"
+              maxlength="500"
+              placeholder="Ex: Comprar na próxima promoção..."
+            ></textarea>
           </div>
           <div class="flex justify-end space-x-2 pt-4">
             <button type="button" class="pixel-btn modal-cancel-btn">
@@ -257,55 +271,75 @@
         <h3 class="modal-title text-green-400">Adicionar ao Hall da Fama</h3>
         <form id="formZerados" class="space-y-4">
           <input type="hidden" id="zeradoId" />
-          <div>
+          <div style="position: relative">
             <label for="zNome"
               >Nome do Jogo <span class="text-red-400">*</span></label
             >
-            <input type="text" id="zNome" required maxlength="100" />
+            <input
+              type="text"
+              id="zNome"
+              required
+              maxlength="100"
+              placeholder="Ex: The Witcher 3"
+              autocomplete="off"
+            />
+            <div class="autocomplete-results" id="zNome-autocomplete"></div>
             <div class="field-error" id="zNome-error"></div>
           </div>
-          <div>
+          <div id="zCategoria-container">
             <label for="zCategoria">Categoria</label>
-            <input type="text" id="zCategoria" maxlength="50" />
           </div>
           <div>
-            <p class="mb-2">
-              Nota (0-5 estrelas) <span class="text-red-400">*</span>
-            </p>
+            <p class="mb-2">Nota <span class="text-red-400">*</span></p>
             <div class="star-rating">
-              <input type="radio" id="5-stars" name="rating" value="5" />
-              <label for="5-stars">★</label>
-              <input type="radio" id="4-stars" name="rating" value="4" />
-              <label for="4-stars">★</label>
-              <input type="radio" id="3-stars" name="rating" value="3" />
-              <label for="3-stars">★</label>
-              <input type="radio" id="2-stars" name="rating" value="2" />
-              <label for="2-stars">★</label>
-              <input type="radio" id="1-star" name="rating" value="1" />
-              <label for="1-star">★</label>
+              <input type="radio" id="5-stars" name="rating" value="5" /><label
+                for="5-stars"
+                >★</label
+              >
+              <input type="radio" id="4-stars" name="rating" value="4" /><label
+                for="4-stars"
+                >★</label
+              >
+              <input type="radio" id="3-stars" name="rating" value="3" /><label
+                for="3-stars"
+                >★</label
+              >
+              <input type="radio" id="2-stars" name="rating" value="2" /><label
+                for="2-stars"
+                >★</label
+              >
+              <input type="radio" id="1-star" name="rating" value="1" /><label
+                for="1-star"
+                >★</label
+              >
             </div>
             <div class="field-error" id="rating-error"></div>
           </div>
           <div>
             <label for="zDataZerei">Data em que zerei</label>
-            <input
-              type="text"
-              id="zDataZerei"
-              placeholder="DD/MM/AAAA"
-              maxlength="10"
-            />
+            <input type="date" id="zDataZerei" />
           </div>
-          <div>
+          <div id="zPlataforma-container">
             <label for="zPlataforma">Plataforma</label>
-            <input type="text" id="zPlataforma" maxlength="50" />
           </div>
           <div>
             <label for="zTempoGasto">Tempo Gasto (h)</label>
-            <input type="number" id="zTempoGasto" min="0" max="9999" />
+            <input
+              type="number"
+              id="zTempoGasto"
+              min="0"
+              max="9999"
+              placeholder="Ex: 120"
+            />
           </div>
           <div>
             <label for="zAvaliacao">Avaliação</label>
-            <textarea id="zAvaliacao" rows="3" maxlength="500"></textarea>
+            <textarea
+              id="zAvaliacao"
+              rows="3"
+              maxlength="500"
+              placeholder="Sua opinião sobre o jogo..."
+            ></textarea>
           </div>
           <div class="flex justify-end space-x-2 pt-4">
             <button type="button" class="pixel-btn modal-cancel-btn">
@@ -324,24 +358,31 @@
         <h3 class="modal-title text-red-400">Registrar Desistência</h3>
         <form id="formDesistidos" class="space-y-4">
           <input type="hidden" id="desistidoId" />
-          <div>
+          <div style="position: relative">
             <label for="dNome"
               >Nome do Jogo <span class="text-red-400">*</span></label
             >
-            <input type="text" id="dNome" required maxlength="100" />
+            <input
+              type="text"
+              id="dNome"
+              required
+              maxlength="100"
+              placeholder="Ex: Cyberpunk 2077 (no lançamento)"
+              autocomplete="off"
+            />
+            <div class="autocomplete-results" id="dNome-autocomplete"></div>
             <div class="field-error" id="dNome-error"></div>
           </div>
-          <div>
+          <div id="dCategoria-container">
             <label for="dCategoria">Categoria</label>
-            <input type="text" id="dCategoria" maxlength="50" />
           </div>
           <div>
             <label for="dMotivo"
               >Motivo <span class="text-red-400">*</span></label
             >
             <select id="dMotivo" required>
-              <option value="">Selecione...</option>
-              <option value="Chato">Chato / Entediante</option>
+              <option value="" disabled>Selecione o motivo...</option>
+              <option value="Chato" selected>Chato / Entediante</option>
               <option value="Difícil">Muito Difícil</option>
               <option value="Bugs">Bugs / Problemas</option>
               <option value="Sem Tempo">Falta de Tempo</option>
@@ -351,11 +392,22 @@
           </div>
           <div>
             <label for="dTempoGameplay">Tempo de Gameplay (h)</label>
-            <input type="number" id="dTempoGameplay" min="0" max="9999" />
+            <input
+              type="number"
+              id="dTempoGameplay"
+              min="0"
+              max="9999"
+              placeholder="Ex: 15"
+            />
           </div>
           <div>
             <label for="dObservacoes">Observações</label>
-            <textarea id="dObservacoes" rows="3" maxlength="500"></textarea>
+            <textarea
+              id="dObservacoes"
+              rows="3"
+              maxlength="500"
+              placeholder="Ex: Muitos bugs que quebravam a imersão."
+            ></textarea>
           </div>
           <div class="flex justify-end space-x-2 pt-4">
             <button type="button" class="pixel-btn modal-cancel-btn">
@@ -369,13 +421,10 @@
       </div>
     </div>
 
-    <!-- Modal de Visualização -->
     <div id="modalView" class="modal">
       <div class="modal-content pixel-border">
         <h3 class="modal-title text-purple-400">Detalhes do Jogo</h3>
-        <div id="viewContent" class="space-y-4">
-          <!-- Conteúdo será preenchido dinamicamente -->
-        </div>
+        <div id="viewContent" class="space-y-4"></div>
         <div class="flex justify-end space-x-2 pt-4">
           <button type="button" class="pixel-btn modal-cancel-btn">
             Fechar
@@ -384,7 +433,6 @@
       </div>
     </div>
 
-    <!-- Modal de Confirmação -->
     <div id="confirmModal" class="modal">
       <div class="modal-content pixel-border text-center">
         <p id="confirmMessage" class="text-xl mb-6"></p>
@@ -397,10 +445,8 @@
       </div>
     </div>
 
-    <!-- Área de Notificações (Toast) -->
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50"></div>
+    <div id="toast-container"></div>
 
-    <!-- JavaScript -->
     <script src="js/script.js"></script>
   </body>
 </html>
