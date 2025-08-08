@@ -15,6 +15,11 @@ body {
   background-size: 25px 25px;
 }
 
+/* --- NOVO --- Classe para travar o scroll do body quando um modal está aberto */
+body.modal-open {
+  overflow: hidden;
+}
+
 .header-title,
 .section-title,
 .modal-title {
@@ -329,6 +334,26 @@ tbody tr:hover {
   animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* --- NOVO --- Estilo para detalhes no modal de visualização */
+#viewContent p {
+  border-bottom: 1px dashed #555;
+  padding-bottom: 0.75rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+#viewContent p:last-child {
+  border-bottom: none;
+}
+#viewContent p strong {
+  color: #eab308;
+  margin-right: 8px;
+  display: inline-block;
+  min-width: 150px; /* Alinha os valores */
+}
+#viewContent p span {
+  color: #e0e0e0;
+}
+
 @keyframes slideIn {
   from {
     transform: translateY(-50px) scale(0.9);
@@ -603,5 +628,9 @@ textarea.error:focus {
   }
   .pixel-btn {
     justify-content: center;
+  }
+  /* --- NOVO --- Ajuste no modal de visualização para telas menores */
+  #viewContent p strong {
+    min-width: 110px;
   }
 }
