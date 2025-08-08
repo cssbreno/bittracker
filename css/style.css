@@ -15,9 +15,19 @@ body {
   background-size: 25px 25px;
 }
 
-/* --- AJUSTE --- Classe aplicada ao <html> para travar o scroll */
+/* --- CORREÇÃO DO SCROLL --- */
+/* Classe aplicada ao <html> para travar o scroll */
 html.modal-open {
   overflow: hidden;
+  height: 100vh;
+}
+
+/* Classe aplicada ao <body> para travar o scroll */
+body.modal-open {
+  overflow: hidden;
+  height: 100vh;
+  position: fixed;
+  width: 100%;
 }
 
 .header-title,
@@ -320,7 +330,7 @@ tbody tr:hover {
   }
 }
 
-/* --- Modals --- */
+/* --- Modals (CORRIGIDOS) --- */
 .modal {
   display: none;
   position: fixed;
@@ -329,7 +339,7 @@ tbody tr:hover {
   top: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
+  overflow: hidden; /* Remove o scroll do backdrop */
   background-color: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(2px);
   animation: fadeIn 0.3s ease-out;
@@ -353,8 +363,29 @@ tbody tr:hover {
   width: 90%;
   max-width: 600px;
   max-height: 85vh;
-  overflow-y: auto;
+  overflow-y: auto; /* Scroll apenas no conteúdo do modal */
   animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  /* Garante que o modal-content seja scrollável independentemente */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Previne propagação do scroll do modal para o backdrop */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #333;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #777;
 }
 
 #viewContent p {
@@ -653,5 +684,14 @@ textarea.error:focus {
   }
   #viewContent p strong {
     min-width: 110px;
+  }
+
+  /* Ajustes específicos para mobile quando modal está aberto */
+  body.modal-open {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 }
