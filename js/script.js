@@ -178,6 +178,72 @@ class FormValidator {
 }
 
 // =================================================================================
+//  CLASSE PARA GERENCIAR SCROLL DOS MODALS
+// =================================================================================
+class ModalScrollManager {
+  static disablePageScroll() {
+    // Salva a posição atual do scroll
+    this.scrollPosition =
+      window.pageYOffset || document.documentElement.scrollTop;
+
+    // Adiciona classes para bloquear o scroll
+    document.documentElement.classList.add("modal-open");
+    document.body.classList.add("modal-open");
+
+    // Define a posição do body para manter a posição visual
+    document.body.style.top = `-${this.scrollPosition}px`;
+  }
+
+  static enablePageScroll() {
+    // Remove as classes que bloqueiam o scroll
+    document.documentElement.classList.remove("modal-open");
+    document.body.classList.remove("modal-open");
+
+    // Remove o estilo top do body
+    document.body.style.top = "";
+
+    // Restaura a posição do scroll
+    if (this.scrollPosition !== undefined) {
+      window.scrollTo(0, this.scrollPosition);
+      this.scrollPosition = undefined;
+    }
+  }
+
+  static preventScrollPropagation(modalElement) {
+    if (!modalElement) return;
+
+    modalElement.addEventListener(
+      "wheel",
+      (e) => {
+        const modalContent = modalElement.querySelector(".modal-content");
+        if (!modalContent) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = modalContent;
+        const isAtTop = scrollTop === 0;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+
+        // Se estiver no topo e tentando rolar para cima, ou no bottom e tentando rolar para baixo
+        if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+
+    // Previne touch scrolling no backdrop
+    modalElement.addEventListener(
+      "touchmove",
+      (e) => {
+        if (e.target === modalElement) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+  }
+}
+
+// =================================================================================
 //  CLASSE PRINCIPAL: GameManager
 // =================================================================================
 class GameManager {
@@ -201,6 +267,15 @@ class GameManager {
     this.switchTab("tabQueroJogar");
     this.bindEvents();
     this.addFadeInAnimation();
+    this.setupModalScrollPrevention();
+  }
+
+  setupModalScrollPrevention() {
+    // Configura prevenção de scroll para todos os modais
+    const modals = document.querySelectorAll(".modal");
+    modals.forEach((modal) => {
+      ModalScrollManager.preventScrollPropagation(modal);
+    });
   }
 
   // --- Persistência e Animações ---
@@ -348,6 +423,34 @@ class GameManager {
       this.charts.motivo.data.datasets[0].data = Object.values(motivoCount);
       this.charts.motivo.update();
     }
+
+    // Atualiza estatísticas dos zerados
+    this.updateZeradosStats();
+  }
+
+  updateZeradosStats() {
+    const totalZeradosEl = document.getElementById("totalZerados");
+    const tempoMedioEl = document.getElementById("tempoMedio");
+
+    if (totalZeradosEl) {
+      totalZeradosEl.textContent = this.state.zerados.length;
+    }
+
+    if (tempoMedioEl) {
+      const jogosComTempo = this.state.zerados.filter(
+        (g) => g.tempoGasto && g.tempoGasto > 0
+      );
+      if (jogosComTempo.length > 0) {
+        const tempoTotal = jogosComTempo.reduce(
+          (acc, g) => acc + parseFloat(g.tempoGasto || 0),
+          0
+        );
+        const tempoMedio = Math.round(tempoTotal / jogosComTempo.length);
+        tempoMedioEl.textContent = `${tempoMedio}h`;
+      } else {
+        tempoMedioEl.textContent = "0h";
+      }
+    }
   }
 
   // --- Renderização ---
@@ -446,7 +549,7 @@ class GameManager {
     }
   }
 
-  // --- Modals e UI ---
+  // --- Modals e UI (CORRIGIDOS PARA SCROLL) ---
   openModal(modalId, itemId = null) {
     const modal = document.getElementById(modalId);
     const form = modal?.querySelector("form");
@@ -542,7 +645,8 @@ class GameManager {
       }
     });
 
-    document.documentElement.classList.add("modal-open");
+    // NOVO: Bloqueia o scroll da página
+    ModalScrollManager.disablePageScroll();
     modal.style.display = "block";
   }
 
@@ -592,7 +696,8 @@ class GameManager {
       }
     }
 
-    document.documentElement.classList.add("modal-open");
+    // NOVO: Bloqueia o scroll da página
+    ModalScrollManager.disablePageScroll();
     modal.style.display = "block";
   }
 
@@ -600,7 +705,8 @@ class GameManager {
     const modal = document.getElementById(modalId);
     if (modal) {
       modal.style.display = "none";
-      document.documentElement.classList.remove("modal-open");
+      // NOVO: Restaura o scroll da página
+      ModalScrollManager.enablePageScroll();
     }
   }
 
@@ -624,7 +730,8 @@ class GameManager {
     if (!modal || !messageEl) return;
     messageEl.textContent = message;
 
-    document.documentElement.classList.add("modal-open");
+    // NOVO: Bloqueia o scroll da página
+    ModalScrollManager.disablePageScroll();
     modal.style.display = "block";
 
     const yesBtn = document.getElementById("confirmBtnYes");
@@ -1145,7 +1252,7 @@ class GameManager {
         };
 
         if (id) {
-          const index = this.state.desistidos.findIndex((g) => g.id === id);
+          const index = this.state.desistidos.findIndex((g) => g.id === itemId);
           if (index > -1) this.state.desistidos[index] = gameData;
         } else {
           this.state.desistidos.push(gameData);
