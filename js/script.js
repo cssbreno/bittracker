@@ -5,6 +5,106 @@ if (typeof Chart !== "undefined") {
   Chart.defaults.borderColor = "#555";
 }
 
+// --- Classe de Validação de Formulários ---
+class FormValidator {
+  static validateForm(formId, rules) {
+    const form = document.getElementById(formId);
+    let isValid = true;
+
+    // Limpar erros anteriores
+    this.clearErrors(form);
+
+    for (const [fieldId, fieldRules] of Object.entries(rules)) {
+      const field = document.getElementById(fieldId);
+      if (!field) continue;
+
+      const fieldValue =
+        field.type === "radio"
+          ? document.querySelector(`input[name="${field.name}"]:checked`)?.value
+          : field.value.trim();
+
+      for (const rule of fieldRules) {
+        if (!this.validateField(field, fieldValue, rule)) {
+          isValid = false;
+          break;
+        }
+      }
+    }
+
+    return isValid;
+  }
+
+  static validateField(field, value, rule) {
+    let isValid = true;
+    let errorMessage = "";
+
+    switch (rule.type) {
+      case "required":
+        if (!value || value === "") {
+          isValid = false;
+          errorMessage = rule.message || "Este campo é obrigatório";
+        }
+        break;
+
+      case "minLength":
+        if (value && value.length < rule.value) {
+          isValid = false;
+          errorMessage = rule.message || `Mínimo de ${rule.value} caracteres`;
+        }
+        break;
+
+      case "maxLength":
+        if (value && value.length > rule.value) {
+          isValid = false;
+          errorMessage = rule.message || `Máximo de ${rule.value} caracteres`;
+        }
+        break;
+
+      case "pattern":
+        if (value && !rule.value.test(value)) {
+          isValid = false;
+          errorMessage = rule.message || "Formato inválido";
+        }
+        break;
+
+      case "number":
+        if (value && (isNaN(value) || value < 0)) {
+          isValid = false;
+          errorMessage = rule.message || "Deve ser um número válido";
+        }
+        break;
+    }
+
+    if (!isValid) {
+      this.showFieldError(field, errorMessage);
+    }
+
+    return isValid;
+  }
+
+  static showFieldError(field, message) {
+    field.classList.add("error");
+
+    const errorId = field.id + "-error";
+    const errorElement = document.getElementById(errorId);
+
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.classList.add("show");
+    }
+  }
+
+  static clearErrors(form) {
+    // Remover classes de erro dos campos
+    const errorFields = form.querySelectorAll(".error");
+    errorFields.forEach((field) => field.classList.remove("error"));
+
+    // Esconder mensagens de erro
+    const errorMessages = form.querySelectorAll(".field-error.show");
+    errorMessages.forEach((error) => error.classList.remove("show"));
+  }
+}
+
 // --- Gerenciamento de Estado com Persistência ---
 class GameManager {
   constructor() {
@@ -41,34 +141,20 @@ class GameManager {
     });
   }
 
-  // --- Persistência de Dados com localStorage ---
+  // --- Persistência de Dados ---
   saveData() {
     try {
-      if (typeof Storage !== "undefined") {
-        localStorage.setItem("gameManagerData", JSON.stringify(this.state));
-        console.log("Dados salvos no localStorage!");
-      } else {
-        // Fallback para ambientes sem localStorage
-        window.gameData = JSON.stringify(this.state);
-        console.log("Dados salvos em memória!");
-      }
+      // Usar variável em memória (sem localStorage para compatibilidade com Claude.ai)
+      window.gameData = JSON.stringify(this.state);
+      console.log("Dados salvos em memória!");
     } catch (error) {
       console.error("Erro ao salvar dados:", error);
-      // Fallback em caso de erro
-      window.gameData = JSON.stringify(this.state);
     }
   }
 
   loadData() {
     try {
-      let savedData = null;
-
-      if (typeof Storage !== "undefined") {
-        savedData = localStorage.getItem("gameManagerData");
-      } else {
-        // Fallback para ambientes sem localStorage
-        savedData = window.gameData;
-      }
+      const savedData = window.gameData;
 
       if (savedData) {
         this.state = JSON.parse(savedData);
@@ -76,7 +162,6 @@ class GameManager {
       }
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
-      // Em caso de erro, manter dados padrão
       this.state = {
         queroJogar: [],
         zerados: [],
@@ -366,31 +451,134 @@ class GameManager {
                 "★".repeat(item.nota || 0) + "☆".repeat(5 - (item.nota || 0))
               }</td>`;
             }
-            return `<td>${value}</td>`;
+            // Truncar texto longo para exibição na tabela
+            if (typeof value === "string" && value.length > 30) {
+              value = value.substring(0, 30) + "...";
+            }
+            return `<td title="${item[col] || ""}">${value}</td>`;
           })
           .join("");
 
         tr.innerHTML = cellsHTML;
 
-        // Célula de ações
+        // Célula de ações com event listeners seguros
         const actionsCell = document.createElement("td");
-        actionsCell.innerHTML = `
-          <button class="action-btn edit" onclick="gameManager.openModal('modal${
-            stateKey.charAt(0).toUpperCase() + stateKey.slice(1)
-          }', '${item.id}')" title="Editar">
-            ✏️
-          </button>
-          <button class="action-btn delete" onclick="gameManager.deleteItem('${stateKey}', '${
-          item.id
-        }', '${item.nome}')" title="Excluir">
-            🗑️
-          </button>
-        `;
-        tr.appendChild(actionsCell);
 
+        // Botão de visualização
+        const viewBtn = document.createElement("button");
+        viewBtn.className = "action-btn view";
+        viewBtn.innerHTML = "👁️";
+        viewBtn.title = "Visualizar";
+        viewBtn.addEventListener("click", () =>
+          this.openViewModal(stateKey, item.id)
+        );
+
+        // Botão de edição
+        const editBtn = document.createElement("button");
+        editBtn.className = "action-btn edit";
+        editBtn.innerHTML = "✏️";
+        editBtn.title = "Editar";
+        editBtn.addEventListener("click", () => {
+          const modalId = `modal${
+            stateKey.charAt(0).toUpperCase() + stateKey.slice(1)
+          }`;
+          this.openModal(modalId, item.id);
+        });
+
+        // Botão de exclusão
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "action-btn delete";
+        deleteBtn.innerHTML = "🗑️";
+        deleteBtn.title = "Excluir";
+        deleteBtn.addEventListener("click", () =>
+          this.deleteItem(stateKey, item.id, item.nome)
+        );
+
+        actionsCell.appendChild(viewBtn);
+        actionsCell.appendChild(editBtn);
+        actionsCell.appendChild(deleteBtn);
+
+        tr.appendChild(actionsCell);
         tbody.appendChild(tr);
       });
     }
+  }
+
+  // --- Modal de Visualização ---
+  openViewModal(stateKey, itemId) {
+    const item = this.state[stateKey].find((g) => g.id === itemId);
+    if (!item) return;
+
+    const modal = document.getElementById("modalView");
+    const content = document.getElementById("viewContent");
+
+    if (!modal || !content) return;
+
+    // Limpar conteúdo anterior
+    content.innerHTML = "";
+
+    // Configurações dos campos por tipo
+    const fieldConfigs = {
+      queroJogar: [
+        { key: "nome", label: "Nome do Jogo" },
+        { key: "categoria", label: "Categoria" },
+        { key: "subcategoria", label: "Subcategoria" },
+        { key: "dataLancamento", label: "Data de Lançamento" },
+        { key: "interesse", label: "Interesse" },
+        { key: "plataformas", label: "Plataformas" },
+        { key: "status", label: "Status" },
+        { key: "tempoEstimado", label: "Tempo Estimado (h)" },
+        { key: "observacoes", label: "Observações" },
+      ],
+      zerados: [
+        { key: "nome", label: "Nome do Jogo" },
+        { key: "categoria", label: "Categoria" },
+        { key: "nota", label: "Nota", type: "stars" },
+        { key: "dataZerei", label: "Data em que zerei" },
+        { key: "plataforma", label: "Plataforma" },
+        { key: "tempoGasto", label: "Tempo Gasto (h)" },
+        { key: "avaliacao", label: "Avaliação" },
+      ],
+      desistidos: [
+        { key: "nome", label: "Nome do Jogo" },
+        { key: "categoria", label: "Categoria" },
+        { key: "motivo", label: "Motivo" },
+        { key: "tempoGameplay", label: "Tempo de Gameplay (h)" },
+        { key: "observacoes", label: "Observações" },
+      ],
+    };
+
+    const fields = fieldConfigs[stateKey] || [];
+
+    fields.forEach((field) => {
+      const fieldDiv = document.createElement("div");
+      fieldDiv.className = "view-field";
+
+      const labelDiv = document.createElement("div");
+      labelDiv.className = "view-field-label";
+      labelDiv.textContent = field.label;
+
+      const valueDiv = document.createElement("div");
+      valueDiv.className = "view-field-value";
+
+      let value = item[field.key];
+
+      if (field.type === "stars" && value) {
+        valueDiv.className += " stars";
+        valueDiv.textContent = "★".repeat(value) + "☆".repeat(5 - value);
+      } else if (value && value.toString().trim() !== "") {
+        valueDiv.textContent = value;
+      } else {
+        valueDiv.className += " empty";
+        valueDiv.textContent = "Não informado";
+      }
+
+      fieldDiv.appendChild(labelDiv);
+      fieldDiv.appendChild(valueDiv);
+      content.appendChild(fieldDiv);
+    });
+
+    modal.style.display = "block";
   }
 
   // --- Gerenciamento de Modals ---
@@ -400,6 +588,7 @@ class GameManager {
     if (!form) return;
 
     form.reset();
+    FormValidator.clearErrors(form);
 
     // Define o ID do item (para edição)
     const hiddenInput = form.querySelector('input[type="hidden"]');
@@ -546,6 +735,69 @@ class GameManager {
     });
   }
 
+  // --- Validação de Formulários ---
+  getValidationRules() {
+    return {
+      queroJogar: {
+        qjNome: [
+          { type: "required", message: "Nome do jogo é obrigatório" },
+          {
+            type: "minLength",
+            value: 2,
+            message: "Nome deve ter pelo menos 2 caracteres",
+          },
+          {
+            type: "maxLength",
+            value: 100,
+            message: "Nome não pode ter mais de 100 caracteres",
+          },
+        ],
+        qjInteresse: [
+          { type: "required", message: "Selecione o nível de interesse" },
+        ],
+      },
+      zerados: {
+        zNome: [
+          { type: "required", message: "Nome do jogo é obrigatório" },
+          {
+            type: "minLength",
+            value: 2,
+            message: "Nome deve ter pelo menos 2 caracteres",
+          },
+          {
+            type: "maxLength",
+            value: 100,
+            message: "Nome não pode ter mais de 100 caracteres",
+          },
+        ],
+        rating: [
+          { type: "required", message: "Selecione uma nota de 1 a 5 estrelas" },
+        ],
+      },
+      desistidos: {
+        dNome: [
+          { type: "required", message: "Nome do jogo é obrigatório" },
+          {
+            type: "minLength",
+            value: 2,
+            message: "Nome deve ter pelo menos 2 caracteres",
+          },
+          {
+            type: "maxLength",
+            value: 100,
+            message: "Nome não pode ter mais de 100 caracteres",
+          },
+        ],
+        dMotivo: [
+          {
+            type: "required",
+            message: "Selecione um motivo para a desistência",
+          },
+        ],
+      },
+    };
+  }
+
   // --- Navegação por Abas com Animação ---
   switchTab(targetId) {
     if (this.currentTab === targetId) return;
@@ -657,25 +909,45 @@ class GameManager {
       .getElementById("addDesistidoBtn")
       ?.addEventListener("click", () => this.openModal("modalDesistidos"));
 
-    // Formulários
+    // Botões de cancelar nos modals
+    document.querySelectorAll(".modal-cancel-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const modal = e.target.closest(".modal");
+        if (modal) {
+          this.closeModal(modal.id);
+        }
+      });
+    });
+
+    // Formulários com validação
     document
       .getElementById("formQueroJogar")
       ?.addEventListener("submit", (e) => {
         e.preventDefault();
+
+        const validationRules = this.getValidationRules().queroJogar;
+        if (!FormValidator.validateForm("formQueroJogar", validationRules)) {
+          this.showToast("Por favor, corrija os erros no formulário", "error");
+          return;
+        }
+
         const id = document.getElementById("queroJogarId")?.value;
         const gameData = {
           id: id || Date.now().toString(),
-          nome: document.getElementById("qjNome")?.value || "",
-          categoria: document.getElementById("qjCategoria")?.value || "",
-          subcategoria: document.getElementById("qjSubcategoria")?.value || "",
+          nome: document.getElementById("qjNome")?.value.trim() || "",
+          categoria: document.getElementById("qjCategoria")?.value.trim() || "",
+          subcategoria:
+            document.getElementById("qjSubcategoria")?.value.trim() || "",
           dataLancamento:
-            document.getElementById("qjDataLancamento")?.value || "",
+            document.getElementById("qjDataLancamento")?.value.trim() || "",
           interesse: document.getElementById("qjInteresse")?.value || "Médio",
-          plataformas: document.getElementById("qjPlataformas")?.value || "",
+          plataformas:
+            document.getElementById("qjPlataformas")?.value.trim() || "",
           status: document.getElementById("qjStatus")?.value || "Já Lançado",
           tempoEstimado:
             document.getElementById("qjTempoEstimado")?.value || "",
-          observacoes: document.getElementById("qjObservacoes")?.value || "",
+          observacoes:
+            document.getElementById("qjObservacoes")?.value.trim() || "",
         };
 
         if (id) {
@@ -693,17 +965,24 @@ class GameManager {
 
     document.getElementById("formZerados")?.addEventListener("submit", (e) => {
       e.preventDefault();
+
+      const validationRules = this.getValidationRules().zerados;
+      if (!FormValidator.validateForm("formZerados", validationRules)) {
+        this.showToast("Por favor, corrija os erros no formulário", "error");
+        return;
+      }
+
       const id = document.getElementById("zeradoId")?.value;
       const rating = e.target.querySelector('input[name="rating"]:checked');
       const gameData = {
         id: id || Date.now().toString(),
-        nome: document.getElementById("zNome")?.value || "",
-        categoria: document.getElementById("zCategoria")?.value || "",
+        nome: document.getElementById("zNome")?.value.trim() || "",
+        categoria: document.getElementById("zCategoria")?.value.trim() || "",
         nota: rating ? parseInt(rating.value) : 0,
-        dataZerei: document.getElementById("zDataZerei")?.value || "",
-        plataforma: document.getElementById("zPlataforma")?.value || "",
+        dataZerei: document.getElementById("zDataZerei")?.value.trim() || "",
+        plataforma: document.getElementById("zPlataforma")?.value.trim() || "",
         tempoGasto: document.getElementById("zTempoGasto")?.value || "",
-        avaliacao: document.getElementById("zAvaliacao")?.value || "",
+        avaliacao: document.getElementById("zAvaliacao")?.value.trim() || "",
       };
 
       if (id) {
@@ -723,14 +1002,22 @@ class GameManager {
       .getElementById("formDesistidos")
       ?.addEventListener("submit", (e) => {
         e.preventDefault();
+
+        const validationRules = this.getValidationRules().desistidos;
+        if (!FormValidator.validateForm("formDesistidos", validationRules)) {
+          this.showToast("Por favor, corrija os erros no formulário", "error");
+          return;
+        }
+
         const id = document.getElementById("desistidoId")?.value;
         const gameData = {
           id: id || Date.now().toString(),
-          nome: document.getElementById("dNome")?.value || "",
-          categoria: document.getElementById("dCategoria")?.value || "",
+          nome: document.getElementById("dNome")?.value.trim() || "",
+          categoria: document.getElementById("dCategoria")?.value.trim() || "",
           motivo: document.getElementById("dMotivo")?.value || "Chato",
           tempoGameplay: document.getElementById("dTempoGameplay")?.value || "",
-          observacoes: document.getElementById("dObservacoes")?.value || "",
+          observacoes:
+            document.getElementById("dObservacoes")?.value.trim() || "",
         };
 
         if (id) {
@@ -834,6 +1121,69 @@ class GameManager {
     // Salvar antes de fechar a página
     window.addEventListener("beforeunload", () => {
       this.saveData();
+    });
+
+    // Validação em tempo real dos campos obrigatórios
+    this.setupRealTimeValidation();
+  }
+
+  // --- Validação em tempo real ---
+  setupRealTimeValidation() {
+    const fieldsToValidate = [
+      { id: "qjNome", rules: this.getValidationRules().queroJogar.qjNome },
+      { id: "zNome", rules: this.getValidationRules().zerados.zNome },
+      { id: "dNome", rules: this.getValidationRules().desistidos.dNome },
+    ];
+
+    fieldsToValidate.forEach(({ id, rules }) => {
+      const field = document.getElementById(id);
+      if (field) {
+        field.addEventListener("blur", () => {
+          const value = field.value.trim();
+
+          // Limpar erros anteriores
+          field.classList.remove("error");
+          const errorEl = document.getElementById(id + "-error");
+          if (errorEl) {
+            errorEl.classList.remove("show");
+          }
+
+          // Validar apenas se o campo não estiver vazio
+          if (value) {
+            for (const rule of rules) {
+              if (!FormValidator.validateField(field, value, rule)) {
+                break;
+              }
+            }
+          }
+        });
+      }
+    });
+
+    // Validação especial para campos select obrigatórios
+    const selectFields = ["qjInteresse", "dMotivo"];
+    selectFields.forEach((id) => {
+      const field = document.getElementById(id);
+      if (field) {
+        field.addEventListener("change", () => {
+          field.classList.remove("error");
+          const errorEl = document.getElementById(id + "-error");
+          if (errorEl) {
+            errorEl.classList.remove("show");
+          }
+        });
+      }
+    });
+
+    // Validação especial para rating (estrelas)
+    const ratingInputs = document.querySelectorAll('input[name="rating"]');
+    ratingInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        const errorEl = document.getElementById("rating-error");
+        if (errorEl) {
+          errorEl.classList.remove("show");
+        }
+      });
     });
   }
 }
