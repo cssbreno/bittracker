@@ -8,6 +8,7 @@
 ## 🕹 Funcionalidades
 
 ### 📜 **Aba Quero Jogar**
+
 - Lista de desejos com:
   - Nome, categoria, data de lançamento, interesse, plataformas e status
 - Botão para **adicionar novos jogos**
@@ -17,6 +18,7 @@
 ---
 
 ### 🏆 **Aba Jogos Zerados**
+
 - Hall da Fama para registrar:
   - Nome, categoria, nota em estrelas, data que zerou, plataforma, tempo gasto e avaliação
 - Estatísticas com:
@@ -28,6 +30,7 @@
 ---
 
 ### 👻 **Aba Jogos Desistidos**
+
 - Cemitério Gamer para:
   - Nome, categoria, motivo, tempo jogado e observações
 - Gráfico com **motivos de desistência**
@@ -36,6 +39,7 @@
 ---
 
 ## 📊 Recursos Extras
+
 - **Gráficos dinâmicos** com [Chart.js](https://www.chartjs.org/)
 - **Persistência de dados** no `localStorage`
 - **Animações de entrada** para tabelas e elementos
@@ -52,7 +56,7 @@
 
 ## 🖼 Prévia
 
-![Prévia do Projeto](https://via.placeholder.com/1000x500.png?text=Preview+Planilha+Gamer+Pixelada)
+![Prévia do Projeto](cssbreno.github.io/spreadshett-gamer/)
 
 ---
 
@@ -69,11 +73,13 @@
 ## 📦 Como Usar
 
 1. **Clone o repositório**
+
    ```bash
    git clone https://github.com/seu-usuario/seu-repositorio.git
    ```
 
 2. **Acesse a pasta**
+
    ```bash
    cd seu-repositorio
    ```
@@ -103,6 +109,15 @@
 ---
 
 ## 🏹 Roadmap de Melhorias
+
+- [ ] Adicionar autenticação de usuário
+  - [ ] Registro de usuários
+  - [ ] Armazenamento seguro de dados
+- [ ] Adicionar suporte a múltiplos usuários
+  - [ ] Login e logout
+  - [ ] Armazenamento separado para cada usuário
+- [ ] Versão mobile otimizada para toque
+- [ ] Validação de formulários
 - [ ] Adicionar suporte a imagens/capas dos jogos
 - [ ] Criar sistema de backup/importação de dados
 - [ ] Melhorar filtros e ordenação das tabelas
@@ -111,6 +126,7 @@
 ---
 
 ## 📜 Licença
+
 Este projeto é de uso livre para fins de estudo e diversão gamer. 🎮  
 Sinta-se à vontade para modificar e compartilhar!
 
