@@ -1,0 +1,17 @@
+{
+  "name": "Bit Tracker",
+  "short_name": "BitTracker",
+  "description": "Rastreador pessoal de jogos",
+  "start_url": "/bittracker/",
+  "display": "standalone",
+  "background_color": "#04040f",
+  "theme_color": "#04040f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

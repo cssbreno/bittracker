@@ -9,11 +9,18 @@
 
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#04040f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css?v=3" />
   </head>
   <body class="p-4 sm:p-8">
     <div class="container mx-auto max-w-full pixel-border bg-[#2c2c2c] p-4">
@@ -23,48 +30,64 @@
 
       <div class="flex justify-center flex-wrap space-x-1 mb-6">
         <button id="tabBtnQueroJogar" class="tab-btn active">
-          Quero Jogar
+          Quero Jogar <span class="tab-count" id="countQueroJogar"></span>
         </button>
-        <button id="tabBtnZerados" class="tab-btn">Zerados</button>
-        <button id="tabBtnDesistidos" class="tab-btn">Desistidos</button>
+        <button id="tabBtnZerados" class="tab-btn">
+          Zerados <span class="tab-count" id="countZerados"></span>
+        </button>
+        <button id="tabBtnDesistidos" class="tab-btn">
+          Desistidos <span class="tab-count" id="countDesistidos"></span>
+        </button>
       </div>
 
       <div class="tab-container">
         <div id="tabQueroJogar" class="tab-content active">
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div class="lg:col-span-3">
-              <h2 class="section-title text-cyan-400">Lista de Desejos</h2>
-              <div class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
+              <div class="flex items-center justify-between">
+                <h2 class="section-title text-cyan-400">Lista de Desejos</h2>
+                <button id="toggleViewQueroJogar" class="view-toggle-btn" title="Alternar entre tabela e kanban">
+                  <i data-lucide="layout-grid"></i>Kanban
+                </button>
+              </div>
+              <div class="table-search mb-2">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" id="searchQueroJogar" placeholder="Filtrar jogos...">
+                <button class="search-clear" id="clearQueroJogar" aria-label="Limpar busca"><i data-lucide="x"></i></button>
+              </div>
+              <div id="tableContainerQueroJogar" class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
                 <table id="tableQueroJogar">
                   <thead>
                     <tr>
-                      <th>Nome</th>
-                      <th>Categoria</th>
-                      <th>Lançamento</th>
-                      <th>Interesse</th>
-                      <th>Plataformas</th>
-                      <th>Status</th>
+                      <th data-col="nome" class="th-sortable">Nome</th>
+                      <th data-col="categoria" class="th-sortable">Categoria</th>
+                      <th data-col="dataLancamento" class="th-sortable">Lançamento</th>
+                      <th data-col="interesse" class="th-sortable">Interesse</th>
+                      <th data-col="plataformas" class="th-sortable">Plataformas</th>
+                      <th data-col="status" class="th-sortable">Status</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
                   <tbody></tbody>
                 </table>
                 <div id="emptyQueroJogar" class="empty-state">
+                  <i data-lucide="gamepad-2" class="empty-icon"></i>
                   Nenhum jogo na sua lista de desejos!
                 </div>
               </div>
+              <div id="kanbanWrapperQueroJogar" style="display:none"></div>
               <div class="mt-4 flex space-x-2">
-                <button
-                  id="addQueroJogarBtn"
-                  class="pixel-btn pixel-btn-primary"
-                >
-                  <span class="mr-2">+</span>Adicionar Jogo
+                <button id="addQueroJogarBtn" class="pixel-btn pixel-btn-primary">
+                  <i data-lucide="plus"></i>Adicionar Jogo
                 </button>
-                <button
-                  id="exportQueroJogarBtn"
-                  class="pixel-btn pixel-btn-secondary"
-                >
-                  <span class="mr-2">↓</span>Exportar CSV
+                <button id="sortearBtn" class="pixel-btn pixel-btn-amber">
+                  <i data-lucide="shuffle"></i>Sortear
+                </button>
+                <button id="exportQueroJogarBtn" class="pixel-btn pixel-btn-secondary">
+                  <i data-lucide="download"></i>Exportar CSV
+                </button>
+                <button id="importQueroJogarBtn" class="pixel-btn pixel-btn-secondary">
+                  <i data-lucide="upload"></i>Importar CSV
                 </button>
               </div>
             </div>
@@ -80,34 +103,52 @@
         <div id="tabZerados" class="tab-content">
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div class="lg:col-span-3">
-              <h2 class="section-title text-green-400">Hall da Fama</h2>
-              <div class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
+              <div class="flex items-center justify-between">
+                <h2 class="section-title text-green-400">Hall da Fama</h2>
+                <button id="toggleViewZerados" class="view-toggle-btn" title="Alternar entre tabela e kanban">
+                  <i data-lucide="layout-grid"></i>Kanban
+                </button>
+              </div>
+              <div class="table-search mb-2">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" id="searchZerados" placeholder="Filtrar jogos...">
+                <button class="search-clear" id="clearZerados" aria-label="Limpar busca"><i data-lucide="x"></i></button>
+              </div>
+              <div id="tableContainerZerados" class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
                 <table id="tableZerados">
                   <thead>
                     <tr>
-                      <th>Nome</th>
-                      <th>Categoria</th>
-                      <th>Nota</th>
-                      <th>Plataforma</th>
-                      <th>Tempo (h)</th>
+                      <th data-col="nome" class="th-sortable">Nome</th>
+                      <th data-col="categoria" class="th-sortable">Categoria</th>
+                      <th data-col="nota" class="th-sortable">Nota</th>
+                      <th data-col="plataforma" class="th-sortable">Plataforma</th>
+                      <th data-col="tempoGasto" class="th-sortable">Tempo (h)</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
                   <tbody></tbody>
                 </table>
                 <div id="emptyZerados" class="empty-state">
+                  <i data-lucide="trophy" class="empty-icon"></i>
                   Você ainda não zerou nenhum jogo!
                 </div>
               </div>
+              <div id="kanbanWrapperZerados" style="display:none"></div>
               <div class="mt-4 flex space-x-2">
                 <button id="addZeradoBtn" class="pixel-btn pixel-btn-success">
-                  <span class="mr-2">🏆</span>Adicionar Jogo Zerado
+                  <i data-lucide="trophy"></i>Adicionar Jogo Zerado
                 </button>
-                <button
-                  id="exportZeradosBtn"
-                  class="pixel-btn pixel-btn-secondary"
-                >
-                  <span class="mr-2">↓</span>Exportar CSV
+                <button id="relatorioBtn" class="pixel-btn pixel-btn-secondary">
+                  <i data-lucide="bar-chart-2"></i>Relatório
+                </button>
+                <button id="exportImageBtn" class="pixel-btn pixel-btn-secondary">
+                  <i data-lucide="image"></i>Exportar Imagem
+                </button>
+                <button id="exportZeradosBtn" class="pixel-btn pixel-btn-secondary">
+                  <i data-lucide="download"></i>Exportar CSV
+                </button>
+                <button id="importZeradosBtn" class="pixel-btn pixel-btn-secondary">
+                  <i data-lucide="upload"></i>Importar CSV
                 </button>
               </div>
             </div>
@@ -127,6 +168,19 @@
                     <span class="text-yellow-400" id="tempoMedio">0h</span>
                   </p>
                 </div>
+                <div class="meta-section">
+                  <div class="meta-section-title">
+                    <i data-lucide="target"></i>Meta Anual
+                  </div>
+                  <div class="meta-input-row">
+                    <input type="number" id="metaAnoInput" min="1" max="999" placeholder="Ex: 20" />
+                    <button class="meta-save-btn" id="metaSaveBtn">Salvar</button>
+                  </div>
+                  <div class="meta-progress-bar">
+                    <div class="meta-progress-fill" id="metaProgressFill" style="width:0%"></div>
+                  </div>
+                  <div class="meta-progress-text" id="metaProgressText">Defina sua meta de jogos para o ano</div>
+                </div>
               </div>
             </div>
           </div>
@@ -135,34 +189,46 @@
         <div id="tabDesistidos" class="tab-content">
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div class="lg:col-span-3">
-              <h2 class="section-title text-red-400">Cemitério de Jogos</h2>
-              <div class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
+              <div class="flex items-center justify-between">
+                <h2 class="section-title text-red-400">Cemitério de Jogos</h2>
+                <button id="toggleViewDesistidos" class="view-toggle-btn" title="Alternar entre tabela e kanban">
+                  <i data-lucide="layout-grid"></i>Kanban
+                </button>
+              </div>
+              <div class="table-search mb-2">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" id="searchDesistidos" placeholder="Filtrar jogos...">
+                <button class="search-clear" id="clearDesistidos" aria-label="Limpar busca"><i data-lucide="x"></i></button>
+              </div>
+              <div id="tableContainerDesistidos" class="table-container pixel-border-inset p-2 bg-[#1a1a1a]">
                 <table id="tableDesistidos">
                   <thead>
                     <tr>
-                      <th>Nome</th>
-                      <th>Categoria</th>
-                      <th>Motivo</th>
-                      <th>Tempo (h)</th>
-                      <th>Observações</th>
+                      <th data-col="nome" class="th-sortable">Nome</th>
+                      <th data-col="categoria" class="th-sortable">Categoria</th>
+                      <th data-col="motivo" class="th-sortable">Motivo</th>
+                      <th data-col="tempoGameplay" class="th-sortable">Tempo (h)</th>
+                      <th data-col="observacoes" class="th-sortable">Observações</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
                   <tbody></tbody>
                 </table>
                 <div id="emptyDesistidos" class="empty-state">
+                  <i data-lucide="skull" class="empty-icon"></i>
                   Nenhum jogo abandonado. Continue assim!
                 </div>
               </div>
+              <div id="kanbanWrapperDesistidos" style="display:none"></div>
               <div class="mt-4 flex space-x-2">
                 <button id="addDesistidoBtn" class="pixel-btn pixel-btn-danger">
-                  <span class="mr-2">👻</span>Adicionar Jogo
+                  <i data-lucide="skull"></i>Adicionar Jogo
                 </button>
-                <button
-                  id="exportDesistidosBtn"
-                  class="pixel-btn pixel-btn-secondary"
-                >
-                  <span class="mr-2">↓</span>Exportar CSV
+                <button id="exportDesistidosBtn" class="pixel-btn pixel-btn-secondary">
+                  <i data-lucide="download"></i>Exportar CSV
+                </button>
+                <button id="importDesistidosBtn" class="pixel-btn pixel-btn-secondary">
+                  <i data-lucide="upload"></i>Importar CSV
                 </button>
               </div>
             </div>
@@ -213,27 +279,16 @@
             />
           </div>
           <div>
-            <label for="qjInteresse"
-              >Interesse <span class="text-red-400">*</span></label
-            >
-            <select id="qjInteresse" required>
-              <option value="" disabled>Selecione o nível...</option>
-              <option value="Baixo">Baixo</option>
-              <option value="Médio" selected>Médio</option>
-              <option value="Alto">Alto</option>
-            </select>
+            <label>Interesse <span class="text-red-400">*</span></label>
+            <div id="qjInteresse-container"></div>
             <div class="field-error" id="qjInteresse-error"></div>
           </div>
           <div id="qjPlataformas-container">
             <label for="qjPlataformas">Plataformas</label>
           </div>
           <div>
-            <label for="qjStatus">Status</label>
-            <select id="qjStatus">
-              <option value="Já Lançado">Já Lançado</option>
-              <option value="Em Breve">Em Breve</option>
-              <option value="Sem Data">Sem Data</option>
-            </select>
+            <label>Status</label>
+            <div id="qjStatus-container"></div>
           </div>
           <div>
             <label for="qjTempoEstimado">Tempo Estimado (h)</label>
@@ -256,10 +311,10 @@
           </div>
           <div class="flex justify-end space-x-2 pt-4">
             <button type="button" class="pixel-btn modal-cancel-btn">
-              Cancelar
+              <i data-lucide="x"></i>Cancelar
             </button>
             <button type="submit" class="pixel-btn pixel-btn-primary">
-              Salvar
+              <i data-lucide="save"></i>Salvar
             </button>
           </div>
         </form>
@@ -343,10 +398,10 @@
           </div>
           <div class="flex justify-end space-x-2 pt-4">
             <button type="button" class="pixel-btn modal-cancel-btn">
-              Cancelar
+              <i data-lucide="x"></i>Cancelar
             </button>
             <button type="submit" class="pixel-btn pixel-btn-success">
-              Salvar
+              <i data-lucide="save"></i>Salvar
             </button>
           </div>
         </form>
@@ -377,17 +432,8 @@
             <label for="dCategoria">Categoria</label>
           </div>
           <div>
-            <label for="dMotivo"
-              >Motivo <span class="text-red-400">*</span></label
-            >
-            <select id="dMotivo" required>
-              <option value="" disabled>Selecione o motivo...</option>
-              <option value="Chato" selected>Chato / Entediante</option>
-              <option value="Difícil">Muito Difícil</option>
-              <option value="Bugs">Bugs / Problemas</option>
-              <option value="Sem Tempo">Falta de Tempo</option>
-              <option value="Outro">Outro</option>
-            </select>
+            <label>Motivo <span class="text-red-400">*</span></label>
+            <div id="dMotivo-container"></div>
             <div class="field-error" id="dMotivo-error"></div>
           </div>
           <div>
@@ -411,10 +457,10 @@
           </div>
           <div class="flex justify-end space-x-2 pt-4">
             <button type="button" class="pixel-btn modal-cancel-btn">
-              Cancelar
+              <i data-lucide="x"></i>Cancelar
             </button>
             <button type="submit" class="pixel-btn pixel-btn-danger">
-              Salvar
+              <i data-lucide="save"></i>Salvar
             </button>
           </div>
         </form>
@@ -427,7 +473,7 @@
         <div id="viewContent" class="space-y-4"></div>
         <div class="flex justify-end space-x-2 pt-4">
           <button type="button" class="pixel-btn modal-cancel-btn">
-            Fechar
+            <i data-lucide="x"></i>Fechar
           </button>
         </div>
       </div>
@@ -438,15 +484,46 @@
         <p id="confirmMessage" class="text-xl mb-6"></p>
         <div class="flex justify-center space-x-4">
           <button id="confirmBtnYes" class="pixel-btn pixel-btn-danger">
-            Sim
+            <i data-lucide="trash-2"></i>Sim, apagar
           </button>
-          <button id="confirmBtnNo" class="pixel-btn">Não</button>
+          <button id="confirmBtnNo" class="pixel-btn">
+            <i data-lucide="x"></i>Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Sorteio -->
+    <div id="modalSorteio" class="modal">
+      <div class="modal-content pixel-border" style="max-width:420px">
+        <h3 class="modal-title text-amber-400">O que jogar hoje?</h3>
+        <div id="sorteioCard" class="sorteio-card"></div>
+        <div class="flex justify-center space-x-3 pt-2">
+          <button id="sortearNovamenteBtn" class="pixel-btn pixel-btn-amber">
+            <i data-lucide="shuffle"></i>Sortear Novamente
+          </button>
+          <button type="button" class="pixel-btn modal-cancel-btn">
+            <i data-lucide="x"></i>Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Relatório Mensal -->
+    <div id="modalRelatorio" class="modal">
+      <div class="modal-content pixel-border" style="max-width:520px">
+        <h3 class="modal-title text-cyan-400">Relatório Mensal</h3>
+        <div id="relatorioContent"></div>
+        <div class="flex justify-end pt-4">
+          <button type="button" class="pixel-btn modal-cancel-btn">
+            <i data-lucide="x"></i>Fechar
+          </button>
         </div>
       </div>
     </div>
 
     <div id="toast-container"></div>
 
-    <script src="js/script.js"></script>
+    <script src="js/script.js?v=4"></script>
   </body>
 </html>
